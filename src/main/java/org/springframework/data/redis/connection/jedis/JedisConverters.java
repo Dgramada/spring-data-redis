@@ -403,6 +403,53 @@ abstract class JedisConverters extends Converters {
 	/**
 	 * Converts a given {@link SetOption} to the according {@code SET} command argument.<br />
 	 * <dl>
+	 * <dt>{@link SetOption.Type#SET_IF_PRESENT}</dt>
+	 * <dd>{@code XX}</dd>
+	 * <dt>{@link SetOption.Type#SET_IF_ABSENT}</dt>
+	 * <dd>{@code NX}</dd>
+	 * <dt>{@link SetOption.Type#UPSERT}</dt>
+	 * <dd>{@code byte[0]}</dd>
+	 * </dl>
+	 *
+	 * @param option must not be {@literal null}.
+	 * @since 2.2
+	 * @deprecated since 4.1 in favor of {@link #toSetCommandArgument(SetOption)}.
+	 */
+	@Deprecated(since = "4.1", forRemoval = true)
+	public static SetParams toSetCommandNxXxArgument(SetOption option) {
+		return toSetCommandNxXxArgument(option, SetParams.setParams());
+	}
+
+	/**
+	 * Converts a given {@link SetOption} to the according {@code SET} command argument.<br />
+	 * <dl>
+	 * <dt>{@link SetOption.Type#SET_IF_PRESENT}</dt>
+	 * <dd>{@code XX}</dd>
+	 * <dt>{@link SetOption.Type#SET_IF_ABSENT}</dt>
+	 * <dd>{@code NX}</dd>
+	 * <dt>{@link SetOption.Type#UPSERT}</dt>
+	 * <dd>{@code byte[0]}</dd>
+	 * </dl>
+	 *
+	 * @param option must not be {@literal null}.
+	 * @since 2.2
+	 * @deprecated since 4.1 in favor of {@link #toSetCommandArgument(SetOption, SetParams)}.
+	 */
+	@Deprecated(since = "4.1", forRemoval = true)
+	public static SetParams toSetCommandNxXxArgument(SetOption option, SetParams params) {
+
+		SetParams paramsToUse = params == null ? SetParams.setParams() : params;
+
+		return switch (option.getType()) {
+			case SET_IF_PRESENT -> paramsToUse.xx();
+			case SET_IF_ABSENT -> paramsToUse.nx();
+			default -> paramsToUse;
+		};
+	}
+
+	/**
+	 * Converts a given {@link SetOption} to the according {@code SET} command argument.<br />
+	 * <dl>
 	 * <dt>{@link SetOption.Type#UPSERT}</dt>
 	 * <dd>{@code byte[0]}</dd>
 	 * <dt>{@link SetOption.Type#SET_IF_PRESENT}</dt>

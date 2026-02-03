@@ -3265,7 +3265,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("foo");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithoutExpirationAndValueEqualOptionShouldSetWhenKeyExistsAndValueEqual() {
 
@@ -3284,7 +3284,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("bar-bar");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndNullOptionShouldThrowException() {
 
@@ -3293,7 +3293,7 @@ public abstract class AbstractConnectionIntegrationTests {
 				.isThrownBy(() -> connection.set(key, "foo", Expiration.milliseconds(500), (SetOption) null));
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueEqualOptionShouldNotSetWhenKeyDoesNotExist() {
 
@@ -3308,7 +3308,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(1)).isEqualTo(Boolean.FALSE);
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueEqualOptionShouldNotSetWhenKeyExistsButValueNotEqual() {
 
@@ -3327,7 +3327,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("foo");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueEqualOptionShouldSetWhenKeyExistsAndValueEqual() {
 
@@ -3348,7 +3348,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(((Long) result.get(4)).doubleValue()).isCloseTo(500, Offset.offset(100d));
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithValueEqualOptionShouldWorkWithEmptyCompareValue() {
 
@@ -3367,7 +3367,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("new-value");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithValueEqualOptionShouldFailWhenEmptyCompareValueDoesNotMatch() {
 
@@ -3420,7 +3420,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("foo-foo");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithoutExpirationAndValueNotEqualOptionShouldNotSetWhenKeyExistsAndValueEqual() {
 
@@ -3439,7 +3439,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("bar");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueNotEqualOptionShouldSetWhenKeyDoesNotExist() {
 
@@ -3456,7 +3456,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(((Long) result.get(2)).doubleValue()).isCloseTo(500, Offset.offset(100d));
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueNotEqualOptionShouldSetWhenKeyExistsButValueNotEqual() {
 
@@ -3477,7 +3477,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(((Long) result.get(4)).doubleValue()).isCloseTo(500, Offset.offset(100d));
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithExpirationAndValueNotEqualOptionShouldNotSetWhenKeyExistsAndValueEqual() {
 
@@ -3497,7 +3497,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("bar");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithValueNotEqualOptionShouldWorkWithEmptyCompareValue() {
 
@@ -3516,7 +3516,7 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(result.get(3)).isEqualTo("new-value");
 	}
 
-	@Test // GH-3254
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setWithValueEqualOptionShouldFailWhenEmptyCompareValueDoesMatch() {
 

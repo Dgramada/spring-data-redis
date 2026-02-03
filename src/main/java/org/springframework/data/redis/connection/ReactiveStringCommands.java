@@ -65,10 +65,8 @@ public interface ReactiveStringCommands {
 		private final @Nullable Expiration expiration;
 		private final @Nullable SetOption option;
 
-		private SetCommand(@Nullable ByteBuffer key,
-						   @Nullable ByteBuffer value,
-						   @Nullable Expiration expiration,
-						   @Nullable SetOption option) {
+		private SetCommand(@Nullable ByteBuffer key, @Nullable ByteBuffer value,
+						   @Nullable Expiration expiration, @Nullable SetOption option) {
 
 			super(key);
 

@@ -20,10 +20,10 @@ pipeline {
 	stages {
 		stage("Docker Images") {
 			parallel {
-				stage('Publish JDK 25 + Redis 8.2 Docker Image') {
+				stage('Publish JDK 25 + Redis 8.4 Docker Image') {
 					when {
 						anyOf {
-							changeset "ci/openjdk25-redis-8.2/Dockerfile"
+							changeset "ci/openjdk25-redis-8.4/Dockerfile"
 							changeset "Makefile"
 							changeset "ci/pipeline.properties"
 						}
@@ -33,7 +33,7 @@ pipeline {
 
 					steps {
 						script {
-							def image = docker.build("springci/spring-data-with-redis-8.2:${p['java.main.tag']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VERSION=${p['docker.redis.8.version']} -f ci/openjdk25-redis-8.2/Dockerfile .")
+							def image = docker.build("springci/spring-data-with-redis-8.4:${p['java.main.tag']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VERSION=${p['docker.redis.8.version']} -f ci/openjdk25-redis-8.4/Dockerfile .")
 							docker.withRegistry(p['docker.registry'], p['docker.credentials']) {
 								image.push()
 							}
@@ -82,7 +82,7 @@ pipeline {
 			steps {
 				script {
 					docker.withRegistry(p['docker.proxy.registry'], p['docker.proxy.credentials']) {
-						docker.image("springci/spring-data-with-redis-8.2:${p['java.main.tag']}").inside(p['docker.java.inside.docker']) {
+						docker.image("springci/spring-data-with-redis-8.4:${p['java.main.tag']}").inside(p['docker.java.inside.docker']) {
 							sh "PROFILE=none LONG_TESTS=true JENKINS_USER_NAME=${p['jenkins.user.name']} ci/test.sh"
 						}
 					}
@@ -111,7 +111,7 @@ pipeline {
 					steps {
 						script {
 							docker.withRegistry(p['docker.proxy.registry'], p['docker.proxy.credentials']) {
-								docker.image("springci/spring-data-with-redis-8.2:${p['java.main.tag']}").inside(p['docker.java.inside.docker']) {
+								docker.image("springci/spring-data-with-redis-8.4:${p['java.main.tag']}").inside(p['docker.java.inside.docker']) {
 									sh "PROFILE=runtimehints LONG_TESTS=false JENKINS_USER_NAME=${p['jenkins.user.name']} ci/test.sh"
 								}
 							}

@@ -526,7 +526,7 @@ public interface RedisStringCommands {
 				return false;
 			}
 			SetOption that = (SetOption) o;
-			return type == that.type && Objects.deepEquals(compareValue, that.compareValue);
+			return type == that.type && Arrays.equals(compareValue, that.compareValue);
 		}
 
 		@Override
@@ -536,7 +536,7 @@ public interface RedisStringCommands {
 
 		@Override
 		public String toString() {
-			return "%s{type=%s, compareValue=%s}".formatted(getClass().getSimpleName(), type, compareValue != null ? "*****" : "<none>");
+			return "%s{type=%s, compareValue=<%s>}".formatted(getClass().getSimpleName(), type, compareValue != null ? compareValue.length + " bytes" : "none");
 		}
 
 		/**
