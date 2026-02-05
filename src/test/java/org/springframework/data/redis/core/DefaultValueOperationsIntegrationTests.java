@@ -608,7 +608,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.getBit(key, bitOffset)).isTrue();
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfEqualReturnsTrueWhenValueMatches() {
 
@@ -622,7 +622,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value2);
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfEqualReturnsFalseWhenValueDoesNotMatch() {
 
@@ -637,7 +637,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value1);
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfEqualReturnsFalseWhenKeyDoesNotExist() {
 
@@ -649,7 +649,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(redisTemplate.hasKey(key)).isFalse();
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void testSetIfEqualWithExpirationEX() {
 
@@ -668,7 +668,26 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value2);
 	}
 
-	@Test // GH-3227
+	@Test
+	@EnabledOnRedisVersion("8.4")
+	void testSetIfEqualWithDurationEX() {
+
+		K key = keyFactory.instance();
+		V value1 = valueFactory.instance();
+		V value2 = valueFactory.instance();
+		Duration duration = Duration.ofSeconds(5);
+
+		assertThat(valueOps.setIfEqual(key, value1, value2, duration)).isFalse();
+		valueOps.set(key, value1);
+
+		assertThat(valueOps.setIfEqual(key, value2, value1, duration)).isTrue();
+
+		Long expire = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
+		assertThat(expire).isLessThan(TimeUnit.SECONDS.toMillis(6)).isGreaterThan(TimeUnit.MILLISECONDS.toMillis(1));
+		assertThat(valueOps.get(key)).isEqualTo(value2);
+	}
+
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void testSetIfEqualWithExpirationPX() {
 
@@ -687,7 +706,26 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value2);
 	}
 
-	@Test // GH-3227
+	@Test
+	@EnabledOnRedisVersion("8.4")
+	void testSetIfEqualWithDurationPX() {
+
+		K key = keyFactory.instance();
+		V value1 = valueFactory.instance();
+		V value2 = valueFactory.instance();
+		Duration duration = Duration.ofMillis(5500);
+
+		assertThat(valueOps.setIfEqual(key, value1, value2, duration)).isFalse();
+		valueOps.set(key, value1);
+
+		assertThat(valueOps.setIfEqual(key, value2, value1, duration)).isTrue();
+
+		Long expire = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
+		assertThat(expire).isLessThan(TimeUnit.SECONDS.toMillis(6)).isGreaterThan(TimeUnit.MILLISECONDS.toMillis(1));
+		assertThat(valueOps.get(key)).isEqualTo(value2);
+	}
+
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfNotEqualReturnsTrueWhenValueDoesNotMatch() {
 
@@ -701,7 +739,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value2);
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfNotEqualReturnsFalseWhenValueDoesMatch() {
 
@@ -715,7 +753,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value1);
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void setIfNotEqualReturnsTrueWhenKeyDoesNotExist() {
 
@@ -726,7 +764,7 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(redisTemplate.hasKey(key)).isTrue();
 	}
 
-	@Test // GH-3227
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void testSetIfNotEqualWithExpirationEX() {
 
@@ -744,7 +782,25 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		assertThat(valueOps.get(key)).isEqualTo(value2);
 	}
 
-	@Test // GH-3227
+	@Test
+	@EnabledOnRedisVersion("8.4")
+	void testSetIfNotEqualWithDurationEX() {
+
+		K key = keyFactory.instance();
+		V value1 = valueFactory.instance();
+		V value2 = valueFactory.instance();
+		Duration duration = Duration.ofSeconds(5);
+
+		valueOps.set(key, value1);
+
+		assertThat(valueOps.setIfNotEqual(key, value2, value2, duration)).isTrue();
+
+		Long expire = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
+		assertThat(expire).isLessThan(TimeUnit.SECONDS.toMillis(6)).isGreaterThan(TimeUnit.MILLISECONDS.toMillis(1));
+		assertThat(valueOps.get(key)).isEqualTo(value2);
+	}
+
+	@Test
 	@EnabledOnRedisVersion("8.4")
 	void testSetIfNotEqualWithExpirationPX() {
 
@@ -756,6 +812,24 @@ public class DefaultValueOperationsIntegrationTests<K, V> {
 		valueOps.set(key, value1);
 
 		assertThat(valueOps.setIfNotEqual(key, value2, value2, expiration)).isTrue();
+
+		Long expire = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
+		assertThat(expire).isLessThan(TimeUnit.SECONDS.toMillis(6)).isGreaterThan(TimeUnit.MILLISECONDS.toMillis(1));
+		assertThat(valueOps.get(key)).isEqualTo(value2);
+	}
+
+	@Test
+	@EnabledOnRedisVersion("8.4")
+	void testSetIfNotEqualWithDurationPX() {
+
+		K key = keyFactory.instance();
+		V value1 = valueFactory.instance();
+		V value2 = valueFactory.instance();
+		Duration duration = Duration.ofMillis(5500);
+
+		valueOps.set(key, value1);
+
+		assertThat(valueOps.setIfNotEqual(key, value2, value2, duration)).isTrue();
 
 		Long expire = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
 		assertThat(expire).isLessThan(TimeUnit.SECONDS.toMillis(6)).isGreaterThan(TimeUnit.MILLISECONDS.toMillis(1));
