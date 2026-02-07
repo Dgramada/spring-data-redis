@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * @author Jiahe Cai
  * @author Christoph Strobl
  * @author Marcin Grzejszczak
+ * @author Yordan Tsintsov
  */
 @NullUnmarked
 public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
@@ -44,14 +45,39 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	void set(@NonNull V value);
 
 	/**
+	 * Set {@code value} and {@code expiration} for the bound key.
+	 *
+	 * @param value must not be {@literal null}.
+	 * @param expiration must not be {@literal null}.
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @since 4.1
+	 */
+	void set(@NonNull V value, @NonNull Expiration expiration);
+
+	/**
 	 * Set the {@code value} and expiration {@code timeout} for the bound key.
 	 *
 	 * @param value must not be {@literal null}.
-	 * @param timeout
+	 * @param timeout must not be {@literal null}.
 	 * @param unit must not be {@literal null}.
-	 * @see <a href="https://redis.io/commands/setex">Redis Documentation: SETEX</a>
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @deprecated in favor of {@link #set(Object, Expiration)}
 	 */
+	@Deprecated(since = "4.1", forRemoval = true)
 	void set(@NonNull V value, long timeout, @NonNull TimeUnit unit);
+
+	/**
+	 * Set the {@code value} and {@code expiration} for the bound key. Return the old string stored at key, or
+	 * {@literal null} if key did not exist. An error is returned and SET aborted if the value stored at key is not a
+	 * string.
+	 *
+	 * @param value must not be {@literal null}.
+	 * @param expiration must not be {@literal null}.
+	 * @return {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @since 4.1
+	 */
+	V setGet(@NonNull V value, @NonNull Expiration expiration);
 
 	/**
 	 * Set the {@code value} and expiration {@code timeout} for the bound key. Return the old string stored at key, or
@@ -59,12 +85,14 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	 * string.
 	 *
 	 * @param value must not be {@literal null}.
-	 * @param timeout
+	 * @param timeout must not be {@literal null}.
 	 * @param unit must not be {@literal null}.
 	 * @return {@literal null} when used in pipeline / transaction.
 	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
 	 * @since 3.5
+	 * @deprecated in favor of {@link #setGet(Object, Expiration)}
 	 */
+	@Deprecated(since = "4.1", forRemoval = true)
 	V setGet(@NonNull V value, long timeout, @NonNull TimeUnit unit);
 
 	/**
@@ -73,12 +101,12 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	 * string.
 	 *
 	 * @param value must not be {@literal null}.
-	 * @param duration expiration duration
+	 * @param timeout must not be {@literal null}.
 	 * @return {@literal null} when used in pipeline / transaction.
 	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
 	 * @since 3.5
 	 */
-	V setGet(@NonNull V value, @NonNull Duration duration);
+	V setGet(@NonNull V value, @NonNull Duration timeout);
 
 	/**
 	 * Set the {@code value} and expiration {@code timeout} for the bound key.
@@ -86,18 +114,14 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	 * @param value must not be {@literal null}.
 	 * @param timeout must not be {@literal null}.
 	 * @throws IllegalArgumentException if either {@code value} or {@code timeout} is not present.
-	 * @see <a href="https://redis.io/commands/setex">Redis Documentation: SETEX</a>
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
 	 * @since 2.1
 	 */
 	default void set(@NonNull V value, @NonNull Duration timeout) {
 
 		Assert.notNull(timeout, "Timeout must not be null");
 
-		if (TimeoutUtils.hasMillis(timeout)) {
-			set(value, timeout.toMillis(), TimeUnit.MILLISECONDS);
-		} else {
-			set(value, timeout.getSeconds(), TimeUnit.SECONDS);
-		}
+		set(value, Expiration.from(timeout));
 	}
 
 	/**
@@ -110,15 +134,28 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	Boolean setIfAbsent(@NonNull V value);
 
 	/**
+	 * Set the bound key to hold the string {@code value} and {@code expiration} if the bound key is absent.
+	 *
+	 * @param value must not be {@literal null}.
+	 * @param expiration must not be {@literal null}.
+	 * @return {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @since 4.1
+	 */
+	Boolean setIfAbsent(@NonNull V value, @NonNull Expiration expiration);
+
+	/**
 	 * Set the bound key to hold the string {@code value} and expiration {@code timeout} if the bound key is absent.
 	 *
 	 * @param value must not be {@literal null}.
-	 * @param timeout
+	 * @param timeout must not be {@literal null}.
 	 * @param unit must not be {@literal null}.
 	 * @return {@literal null} when used in pipeline / transaction.
 	 * @since 2.1
 	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @deprecated in favor of {@link #setIfAbsent(Object, Expiration)}
 	 */
+	@Deprecated(since = "4.1", forRemoval = true)
 	Boolean setIfAbsent(@NonNull V value, long timeout, @NonNull TimeUnit unit);
 
 	/**
@@ -135,11 +172,7 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 
 		Assert.notNull(timeout, "Timeout must not be null");
 
-		if (TimeoutUtils.hasMillis(timeout)) {
-			return setIfAbsent(value, timeout.toMillis(), TimeUnit.MILLISECONDS);
-		}
-
-		return setIfAbsent(value, timeout.getSeconds(), TimeUnit.SECONDS);
+		return setIfAbsent(value, Expiration.from(timeout));
 	}
 
 	/**
@@ -154,16 +187,29 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 	Boolean setIfPresent(@NonNull V value);
 
 	/**
+	 * Set the bound key to hold the string {@code value} and {@code expiration} if the bound key is present.
+	 *
+	 * @param value must not be {@literal null}.
+	 * @param expiration must not be {@literal null}.
+	 * @return command result indicating if the key has been set.
+	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
+	 * @since 4.1
+	 */
+	Boolean setIfPresent(@NonNull V value, @NonNull Expiration expiration);
+
+	/**
 	 * Set the bound key to hold the string {@code value} and expiration {@code timeout} if the bound key is present.
 	 *
 	 * @param value must not be {@literal null}.
-	 * @param timeout the key expiration timeout.
+	 * @param timeout must not be {@literal null}.
 	 * @param unit must not be {@literal null}.
 	 * @return command result indicating if the key has been set.
 	 * @throws IllegalArgumentException if either {@code value} or {@code timeout} is not present.
 	 * @see <a href="https://redis.io/commands/set">Redis Documentation: SET</a>
 	 * @since 2.1
+	 * @deprecated in favor of {@link #setIfPresent(Object, Expiration)}
 	 */
+	@Deprecated(since = "4.1", forRemoval = true)
 	Boolean setIfPresent(@NonNull V value, long timeout, @NonNull TimeUnit unit);
 
 	/**
@@ -180,11 +226,7 @@ public interface BoundValueOperations<K, V> extends BoundKeyOperations<K> {
 
 		Assert.notNull(timeout, "Timeout must not be null");
 
-		if (TimeoutUtils.hasMillis(timeout)) {
-			return setIfPresent(value, timeout.toMillis(), TimeUnit.MILLISECONDS);
-		}
-
-		return setIfPresent(value, timeout.getSeconds(), TimeUnit.SECONDS);
+		return setIfPresent(value, Expiration.from(timeout));
 	}
 
 	/**

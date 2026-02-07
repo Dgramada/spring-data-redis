@@ -49,8 +49,11 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.RedisStaticMasterReplicaConfiguration;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.connection.lettuce.extension.LettuceConnectionFactoryExtension;
+import org.springframework.data.redis.core.types.RedisClientInfo;
 import org.springframework.data.redis.test.condition.EnabledOnRedisClusterAvailable;
+import org.springframework.data.redis.test.condition.EnabledOnRedisVersion;
 import org.springframework.data.redis.test.extension.LettuceTestClientResources;
+import org.springframework.data.redis.util.RedisClientLibraryInfo;
 
 /**
  * Integration test of {@link LettuceConnectionFactory}
@@ -520,6 +523,35 @@ class LettuceConnectionFactoryTests {
 		assertThat(connection.getClientName()).isEqualTo("clientName");
 		connection.close();
 	}
+
+		@Test // GH-3268
+		@EnabledOnRedisVersion("7.2")
+		void clientListReportsLettuceLibNameWithSpringDataSuffix() {
+
+			LettuceClientConfiguration configuration = LettuceTestClientConfiguration.builder().clientName("clientNameLibName")
+					.build();
+
+			LettuceConnectionFactory factory = new LettuceConnectionFactory(new RedisStandaloneConfiguration(), configuration);
+			factory.setShareNativeConnection(false);
+			factory.start();
+
+			ConnectionFactoryTracker.add(factory);
+
+			try (RedisConnection connection = factory.getConnection()) {
+
+				RedisClientInfo self = connection.serverCommands().getClientList()
+						.stream()
+						.filter(info -> "clientNameLibName".equals(info.getName()))
+						.findFirst()
+						.orElseThrow();
+
+				String expectedUpstreamDriver = "%s_v%s".formatted(RedisClientLibraryInfo.FRAMEWORK_NAME, RedisClientLibraryInfo.getVersion());
+				assertThat(self.get("lib-name")).startsWith("Lettuce(" + expectedUpstreamDriver);
+
+			} finally {
+				factory.destroy();
+			}
+		}
 
 	@Test // DATAREDIS-576
 	void getClientNameShouldEqualWithFactorySetting() {

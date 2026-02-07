@@ -178,8 +178,9 @@ public class PubSubResubscribeTests {
 		String ANOTHER_CHANNEL = "pubsub::test::extra";
 
 		// bind listener on another channel
+		container.addMessageListener(adapter, new ChannelTopic(CHANNEL));
 		container.addMessageListener(adapter, new ChannelTopic(ANOTHER_CHANNEL));
-		container.removeMessageListener(null, new ChannelTopic(CHANNEL));
+		container.removeMessageListener(adapter, new ChannelTopic(CHANNEL));
 
 		// Listener removed from channel
 		template.convertAndSend(CHANNEL, payload1);

@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -225,19 +226,29 @@ class RedisMessageListenerContainerUnitTests {
 		assertThatIllegalStateException().isThrownBy(() -> container.afterPropertiesSet());
 	}
 
-	@Test // GH-3009
-	void shouldRemoveAllListenersWhenListenerIsNull() {
+	@Test // GH-3237
+	void removeListenerBySingleTopicShouldFailWhenTopicIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> container.removeMessageListener(adapter, (Topic) null));
+	}
 
-		MessageListener listener1 = mock(MessageListener.class);
-		MessageListener listener2 = mock(MessageListener.class);
-		Topic topic = new ChannelTopic("topic1");
+	@Test // GH-3237
+	void removeListenerBySingleTopicShouldFailWhenListenerIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> container.removeMessageListener(null, new ChannelTopic("a")));
+	}
 
-		container.addMessageListener(listener1, Collections.singletonList(topic));
-		container.addMessageListener(listener2, Collections.singletonList(topic));
+	@Test // GH-3237
+	void removeListenerBySetShouldFailWhenListenerIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> container.removeMessageListener(null, Collections.emptySet()));
+	}
 
-		container.removeMessageListener(null, Collections.singletonList(topic));
+	@Test // GH-3237
+	void removeListenerBySetShouldFailWhenSetIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> container.removeMessageListener(adapter, (Set)null));
+	}
 
-		assertThatNoException().isThrownBy(() -> container.removeMessageListener(null, Collections.singletonList(topic)));
+	@Test // GH-3237
+	void removeListenerFromAllTopicsShouldFailWhenListenerIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> container.removeMessageListener(null));
 	}
 
 	@Test // GH-3208

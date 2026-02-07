@@ -18,8 +18,12 @@ package org.springframework.data.redis.listener;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.*;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -352,6 +356,102 @@ class RedisMessageListenerContainerIntegrationTests {
 
 		assertThat(received.await(2, TimeUnit.SECONDS)).isTrue();
 		container.destroy();
+	}
+
+	/**
+	 * Tests the variants of {@link RedisMessageListenerContainer#removeMessageListener} to ensure the removal stops
+	 * message delivery and that the pattern and channel listeners do not interfere with one another upon removal.
+	 */
+	@Test // GH-3237
+	void shouldRemoveListenerFromChannelsAndTopics() throws Exception {
+
+		AtomicInteger subscriptions = new AtomicInteger();
+		Map<String, String> patternsMessages = new HashMap<>();
+		Map<String, String> channelsMessages = new HashMap<>();
+
+		MessageListener patternListener = new CompositeListener() {
+			@Override
+			public void onMessage(Message message, byte @Nullable [] pattern) {
+				patternsMessages.put(new String(pattern), message.toString());
+			}
+
+			@Override
+			public void onPatternSubscribed(byte[] pattern, long count) {
+				subscriptions.incrementAndGet();
+			}
+
+		};
+
+		CompositeListener channelListener = new CompositeListener() {
+			@Override
+			public void onMessage(Message message, byte @Nullable [] pattern) {
+				channelsMessages.put(new String(pattern), message.toString());
+			}
+
+			@Override
+			public void onChannelSubscribed(byte[] channel, long count) {
+				subscriptions.incrementAndGet();
+			}
+
+		};
+
+		try {
+			container.start();
+			container.addMessageListener(patternListener, new PatternTopic("a-pattern-0"));
+			container.addMessageListener(patternListener, new PatternTopic("a-pattern-1"));
+			container.addMessageListener(patternListener, new PatternTopic("a-pattern-2"));
+			container.addMessageListener(channelListener, new ChannelTopic("a-channel-0"));
+			container.addMessageListener(channelListener, new ChannelTopic("a-channel-1"));
+
+			// Wait for the subscriptions to register
+			await().untilAtomic(subscriptions, Matchers.is(5));
+
+			try (RedisConnection connection = connectionFactory.getConnection()) {
+
+				// remove patternListener from single topic
+				container.removeMessageListener(patternListener, new PatternTopic("a-pattern-0"));
+
+				// send each topic a msg - removed listener should not get msg
+				connection.publish("a-pattern-0".getBytes(), "pattern100".getBytes());
+				connection.publish("a-pattern-1".getBytes(), "pattern101".getBytes());
+				connection.publish("a-pattern-2".getBytes(), "pattern102".getBytes());
+				await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> {
+					assertThat(patternsMessages).doesNotContain(entry("a-pattern-0", "pattern100"))
+							.contains(entry("a-pattern-1", "pattern101"), entry("a-pattern-2", "pattern102"));
+				});
+				patternsMessages.clear();
+
+				// remove pattern listener from multiple (2 remaining topics)
+				container.removeMessageListener(patternListener,
+						Set.of(new PatternTopic("a-pattern-1"), new PatternTopic("a-pattern-2")));
+
+				// no listener should receive msgs
+				connection.publish("a-pattern-0".getBytes(), "pattern100".getBytes());
+				connection.publish("a-pattern-1".getBytes(), "pattern101".getBytes());
+				connection.publish("a-pattern-2".getBytes(), "pattern102".getBytes());
+				await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> assertThat(patternsMessages).isEmpty());
+
+				// sanity check sending msgs to channels (removal of pattern listeners did not disrupt)
+				connection.publish("a-channel-0".getBytes(), "channel100".getBytes());
+				connection.publish("a-channel-1".getBytes(), "channel101".getBytes());
+				await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> {
+					assertThat(channelsMessages).containsExactly(entry("a-channel-0", "channel100"),
+							entry("a-channel-1", "channel101"));
+				});
+				channelsMessages.clear();
+
+				// remove channel listener from all channel topics
+				container.removeMessageListener(channelListener);
+
+				// should receive no msgs
+				connection.publish("a-channel-0".getBytes(), "channel100".getBytes());
+				connection.publish("a-channel-1".getBytes(), "channel101".getBytes());
+				await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> assertThat(channelsMessages).isEmpty());
+			}
+		}
+		finally {
+			container.destroy();
+		}
 	}
 
 	interface CompositeListener extends MessageListener, SubscriptionListener {

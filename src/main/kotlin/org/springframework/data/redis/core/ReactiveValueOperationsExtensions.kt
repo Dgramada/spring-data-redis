@@ -18,6 +18,7 @@ package org.springframework.data.redis.core
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.redis.connection.BitFieldSubCommands
+import org.springframework.data.redis.core.types.Expiration
 import java.time.Duration
 
 /**
@@ -28,6 +29,15 @@ import java.time.Duration
  */
 suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setAndAwait(key: K, value: V): Boolean =
 		set(key, value).awaitSingle()
+
+/**
+ * Coroutines variant of [ReactiveValueOperations.set].
+ *
+ * @author Yordan Tsintsov
+ * @since 4.1
+ */
+suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setAndAwait(key: K, value: V, expiration: Expiration): Boolean =
+	set(key, value, expiration).awaitSingle()
 
 /**
  * Coroutines variant of [ReactiveValueOperations.set].
@@ -50,6 +60,15 @@ suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setIfAbsentAndAwait
 /**
  * Coroutines variant of [ReactiveValueOperations.setIfAbsent].
  *
+ * @author Yordan Tsintsov
+ * @since 4.1
+ */
+suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setIfAbsentAndAwait(key: K, value: V, expiration: Expiration): Boolean =
+	setIfAbsent(key, value, expiration).awaitSingle()
+
+/**
+ * Coroutines variant of [ReactiveValueOperations.setIfAbsent].
+ *
  * @author Mark Paluch
  * @since 2.2
  */
@@ -64,6 +83,15 @@ suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setIfAbsentAndAwait
  */
 suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setIfPresentAndAwait(key: K, value: V): Boolean =
 		setIfPresent(key, value).awaitSingle()
+
+/**
+ * Coroutines variant of [ReactiveValueOperations.setIfPresent].
+ *
+ * @author Yordan Tsintsov
+ * @since 4.1
+ */
+suspend fun <K : Any, V : Any> ReactiveValueOperations<K, V>.setIfPresentAndAwait(key: K, value: V, expiration: Expiration): Boolean =
+	setIfPresent(key, value, expiration).awaitSingle()
 
 /**
  * Coroutines variant of [ReactiveValueOperations.setIfPresent].
