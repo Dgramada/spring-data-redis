@@ -406,10 +406,10 @@ public interface RedisStringCommands {
 	@NullUnmarked
 	class SetOption {
 
-		// Cached instances for stateless conditions
+		// Cached instances for stateless options
 		public static final SetOption UPSERT = new SetOption(Type.UPSERT, null);
-		public static final SetOption IF_ABSENT = new SetOption(Type.SET_IF_ABSENT, null);
-		public static final SetOption IF_PRESENT = new SetOption(Type.SET_IF_PRESENT, null);
+		public static final SetOption SET_IF_ABSENT = new SetOption(Type.SET_IF_ABSENT, null);
+		public static final SetOption SET_IF_PRESENT = new SetOption(Type.SET_IF_PRESENT, null);
 
 		private final Type type;
 		private final byte @Nullable [] compareValue;
@@ -438,7 +438,7 @@ public interface RedisStringCommands {
 		 * @return a cached {@link SetOption} instance for the {@code NX} condition.
 		 */
 		public static SetOption ifAbsent() {
-			return IF_ABSENT;
+			return SET_IF_ABSENT;
 		}
 
 		/**
@@ -449,7 +449,7 @@ public interface RedisStringCommands {
 		 * @return a cached {@link SetOption} instance for the {@code XX} condition.
 		 */
 		public static SetOption ifPresent() {
-			return IF_PRESENT;
+			return SET_IF_PRESENT;
 		}
 
 		/**

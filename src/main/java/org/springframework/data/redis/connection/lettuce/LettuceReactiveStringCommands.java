@@ -131,7 +131,7 @@ class LettuceReactiveStringCommands implements ReactiveStringCommands {
 		Expiration expiration = command.getExpiration().orElse(null);
 		SetOption option = command.getOption().orElse(null);
 
-		return  LettuceConverters.toReactiveSetArgs(expiration, option);
+		return LettuceConverters.toReactiveSetArgs(expiration, option);
 	}
 
 	@Override

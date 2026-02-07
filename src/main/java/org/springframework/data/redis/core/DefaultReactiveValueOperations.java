@@ -74,7 +74,7 @@ class DefaultReactiveValueOperations<K, V> implements ReactiveValueOperations<K,
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(expiration, "Expiration must not be null");
 
-		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration, SetOption.UPSERT));
+		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration, SetOption.upsert()));
 	}
 
 	@Override
@@ -93,7 +93,7 @@ class DefaultReactiveValueOperations<K, V> implements ReactiveValueOperations<K,
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(expiration, "Expiration must not be null");
 
-		return createMono(stringCommands -> stringCommands.setGet(rawKey(key), rawValue(value), expiration, SetOption.UPSERT))
+		return createMono(stringCommands -> stringCommands.setGet(rawKey(key), rawValue(value), expiration, SetOption.upsert()))
 				.map(this::readRequiredValue);
 	}
 
@@ -123,7 +123,8 @@ class DefaultReactiveValueOperations<K, V> implements ReactiveValueOperations<K,
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(expiration, "Expiration must not be null");
 
-		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration, SetOption.SET_IF_ABSENT));
+		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration,
+				SetOption.ifAbsent()));
 	}
 
 	@Override
@@ -151,7 +152,8 @@ class DefaultReactiveValueOperations<K, V> implements ReactiveValueOperations<K,
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(expiration, "Expiration must not be null");
 
-		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration, SetOption.SET_IF_PRESENT));
+		return createMono(stringCommands -> stringCommands.set(rawKey(key), rawValue(value), expiration,
+				SetOption.ifPresent()));
 	}
 
 	@Override
