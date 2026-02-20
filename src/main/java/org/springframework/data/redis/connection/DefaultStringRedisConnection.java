@@ -249,6 +249,11 @@ public class DefaultStringRedisConnection implements StringRedisConnection, Deco
 	}
 
 	@Override
+	public RedisJsonCommands jsonCommands() {
+		return this;
+	}
+
+	@Override
 	public Long append(byte[] key, byte[] value) {
 		return convertAndReturn(delegate.append(key, value), Converters.identityConverter());
 	}

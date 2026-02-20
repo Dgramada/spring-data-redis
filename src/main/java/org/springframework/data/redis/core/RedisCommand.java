@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Sébastien Volle
  * @author John Blum
  * @author LeeHyungGeol
+ * @author Yordan Tsintsov
  * @since 1.3
  * @link <a href=
  *       "https://github.com/antirez/redis/blob/843de8b786562d8d77c78d83a971060adc61f77a/src/server.c#L180">Redis
@@ -164,6 +165,26 @@ public enum RedisCommand {
 	INCRBY("rw", 2, 2), //
 	INCRBYFLOAT("rw", 2, 2), //
 	INFO("r", 0), //
+
+	// -- J
+//	JSON_ARRAPPEND("w", 2), //
+//	JSON_ARRINDEX("r", 3, 5), //
+//	JSON_ARRINSERT("w", 4), //
+//	JSON_ARRLEN("r", 1, 2), //
+//	JSON_ARRPOP("rw", 1, 3), //
+//	JSON_ARRTRIM("w", 4, 4), //
+	JSON_CLEAR("w", 1, 2), //
+	JSON_DEL("w", 1, 2), //
+	JSON_GET("r", 1), //
+	JSON_MERGE("w", 3, 3), //
+	JSON_MGET("r", 2), //
+	JSON_MSET("w", 3), //
+//	JSON_NUMINCRBY("w", 3, 3), //
+//	JSON_NUMMULTBY("w", 3, 3), //
+	JSON_SET("w", 3, 4), //
+//	JSON_STRAPPEND("w", 2, 3), //
+//	JSON_STRLEN("r", 1, 2), //
+//	JSON_TOGGLE("w", 2, 2), //
 
 	// -- K
 	KEYS("r", 1), //

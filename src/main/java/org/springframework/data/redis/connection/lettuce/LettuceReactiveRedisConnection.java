@@ -168,6 +168,11 @@ class LettuceReactiveRedisConnection implements ReactiveRedisConnection {
 	}
 
 	@Override
+	public ReactiveJsonCommands jsonCommands() {
+		return new LettuceReactiveJsonCommands(this);
+	}
+
+	@Override
 	public Mono<String> ping() {
 		return execute(BaseRedisReactiveCommands::ping).next();
 	}

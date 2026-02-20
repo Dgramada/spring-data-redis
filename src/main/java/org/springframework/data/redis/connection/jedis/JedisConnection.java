@@ -275,6 +275,11 @@ public class JedisConnection extends AbstractRedisConnection {
 	}
 
 	@Override
+	public RedisJsonCommands jsonCommands() {
+		return null;
+	}
+
+	@Override
 	public RedisScriptingCommands scriptingCommands() {
 		return scriptingCommands;
 	}

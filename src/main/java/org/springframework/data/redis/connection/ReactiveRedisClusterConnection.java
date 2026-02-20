@@ -57,6 +57,9 @@ public interface ReactiveRedisClusterConnection extends ReactiveRedisConnection,
 	@Override
 	ReactiveClusterStreamCommands streamCommands();
 
+	@Override
+	ReactiveClusterJsonCommands jsonCommands();
+
 	/**
 	 * Test the connection to a specific Redis cluster node.
 	 *

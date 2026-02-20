@@ -22,6 +22,7 @@ import io.lettuce.core.*;
 import io.lettuce.core.cluster.models.partitions.Partitions;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode.NodeFlag;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +32,11 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
+import io.lettuce.core.json.DefaultJsonParser;
+import io.lettuce.core.json.JsonParser;
+import io.lettuce.core.json.JsonPath;
+import io.lettuce.core.json.arguments.JsonMsetArgs;
+import io.lettuce.core.json.arguments.JsonSetArgs;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -50,6 +56,8 @@ import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.connection.RedisClusterNode.Flag;
 import org.springframework.data.redis.connection.RedisClusterNode.LinkState;
 import org.springframework.data.redis.connection.RedisClusterNode.SlotRange;
+import org.springframework.data.redis.connection.RedisJsonCommands.JsonSetOption;
+import org.springframework.data.redis.connection.RedisJsonCommands.JsonMSetArg;
 import org.springframework.data.redis.connection.RedisListCommands.Direction;
 import org.springframework.data.redis.connection.RedisListCommands.Position;
 import org.springframework.data.redis.connection.RedisNode.NodeType;
@@ -88,6 +96,7 @@ import org.springframework.util.StringUtils;
  * @author Vikas Garg
  * @author John Blum
  * @author Roman Osadchuk
+ * @author Yordan Tsintsov
  */
 @SuppressWarnings("ConstantConditions")
 public abstract class LettuceConverters extends Converters {
@@ -99,6 +108,8 @@ public abstract class LettuceConverters extends Converters {
 
 	private static final long INDEXED_RANGE_START = 0;
 	private static final long INDEXED_RANGE_END = -1;
+
+	private static final JsonParser JSON_PARSER = new DefaultJsonParser();
 
 	static {
 		PLUS_BYTES = toBytes("+");
@@ -980,6 +991,33 @@ public abstract class LettuceConverters extends Converters {
 			case ASYNC -> FlushMode.ASYNC;
 			case SYNC -> FlushMode.SYNC;
 		};
+	}
+
+	static JsonSetArgs toJsonSetArgs(JsonSetOption option) {
+
+		return switch (option) {
+			case UPSERT -> new JsonSetArgs();
+			case IF_PATH_NOT_EXISTS -> new JsonSetArgs().nx();
+			case IF_PATH_EXISTS -> new JsonSetArgs().xx();
+		};
+	}
+
+	static JsonMsetArgs<byte[], byte[]> toJsonMsetArgs(JsonMSetArg arg) {
+
+		return new JsonMsetArgs<>(
+				arg.key(),
+				JsonPath.of(arg.path()),
+				JSON_PARSER.fromObject(arg.value())
+		);
+	}
+
+	static JsonMsetArgs<ByteBuffer, ByteBuffer> toJsonMsetArgs(ReactiveJsonCommands.JsonMSetCommand.ReactiveJsonMSetArg arg) {
+
+		return new JsonMsetArgs<>(
+				arg.key(),
+				JsonPath.of(arg.path()),
+				JSON_PARSER.fromObject(arg.value())
+		);
 	}
 
 	/**

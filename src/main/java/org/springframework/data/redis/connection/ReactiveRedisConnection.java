@@ -157,6 +157,14 @@ public interface ReactiveRedisConnection extends Closeable {
 	ReactiveStreamCommands streamCommands();
 
 	/**
+	 * Get {@link ReactiveJsonCommands}.
+	 *
+	 * @return never {@literal null}.
+	 * @since 4.3
+	 */
+	ReactiveJsonCommands jsonCommands();
+
+	/**
 	 * Test connection.
 	 *
 	 * @return {@link Mono} wrapping server response message - usually {@literal PONG}.

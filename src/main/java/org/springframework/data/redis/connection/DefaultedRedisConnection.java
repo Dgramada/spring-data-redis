@@ -69,6 +69,7 @@ import org.springframework.data.redis.domain.geo.GeoShape;
  * @author Shyngys Sapraliyev
  * @author Tihomir Mateev
  * @author Mingi Lee
+ * @author Yordan Tsintsov
  * @since 2.0
  */
 @Deprecated
@@ -2054,6 +2055,57 @@ public interface DefaultedRedisConnection extends RedisCommands, RedisCommandsPr
 			org.springframework.data.domain.Range<? extends Number> range,
 			org.springframework.data.redis.connection.Limit limit) {
 		return zSetCommands().zRangeStoreRevByScore(dstKey, srcKey, range, limit);
+	}
+
+	// JSON COMMANDS
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default Long jsonClear(byte @NonNull [] key, @NonNull String path) {
+		return jsonCommands().jsonClear(key, path);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default Long jsonDel(byte @NonNull [] key, @NonNull String path) {
+		return jsonCommands().jsonDel(key, path);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default @Nullable List<@Nullable String> jsonGet(byte @NonNull [] key, String @NonNull ... paths) {
+		return jsonCommands().jsonGet(key, paths);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default Boolean jsonMerge(byte @NonNull [] key, @NonNull String path, @Nullable String value) {
+		return jsonCommands().jsonMerge(key, path, value);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default @Nullable List<@Nullable String> jsonMGet(@NonNull String path, byte @NonNull []... keys) {
+		return jsonCommands().jsonMGet(path, keys);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default Boolean jsonMSet(@NonNull List<JsonMSetArg> args) {
+		return jsonCommands().jsonMSet(args);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
+	default Boolean jsonSet(byte @NonNull [] key, @NonNull String path, @Nullable String value, @NonNull JsonSetOption option) {
+		return jsonCommands().jsonSet(key, path, value, option);
 	}
 
 }

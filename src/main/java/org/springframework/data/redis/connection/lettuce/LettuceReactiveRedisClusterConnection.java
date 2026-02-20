@@ -151,6 +151,11 @@ class LettuceReactiveRedisClusterConnection extends LettuceReactiveRedisConnecti
 	}
 
 	@Override
+	public LettuceReactiveClusterJsonCommands jsonCommands() {
+		return new LettuceReactiveClusterJsonCommands(this);
+	}
+
+	@Override
 	public Mono<String> ping() {
 		return clusterGetNodes().flatMap(node -> execute(node, BaseRedisReactiveCommands::ping)).last();
 	}

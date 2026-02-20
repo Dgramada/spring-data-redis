@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Costin Leau
  * @author Mark Paluch
  * @author Christoph Strobl
+ * @author Yordan Tsintsov
  */
 public enum DataType {
 
@@ -32,9 +33,14 @@ public enum DataType {
 	/**
 	 * @since 2.2
 	 */
-	STREAM("stream");
+	STREAM("stream"),
 
-	private static final Map<String, DataType> codeLookup = new ConcurrentHashMap<>(7);
+	/**
+	 * @since 4.3
+	 */
+	JSON("json");
+
+	private static final Map<String, DataType> codeLookup = new ConcurrentHashMap<>(8);
 
 	static {
 		for (DataType type : EnumSet.allOf(DataType.class)) {

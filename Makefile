@@ -178,7 +178,7 @@ work/$(PROJECT)/bin/$(PROJECT)-cli work/$(PROJECT)/bin/$(PROJECT)-server:
 	@mkdir -p work/$(PROJECT)
 
 	curl -sSL https://github.com/$(GH_ORG)/$(PROJECT)/archive/refs/tags/$(VERSION).tar.gz | tar xzf - -C work
-	$(MAKE) -C work/$(PROJECT)-$(VERSION) -j
+	BUILD_WITH_MODULES=yes INSTALL_RUST_TOOLCHAIN=yes $(MAKE) -C work/$(PROJECT)-$(VERSION) -j
 	$(MAKE) -C work/$(PROJECT)-$(VERSION) PREFIX=$(shell pwd)/work/$(PROJECT) install
 	rm -rf work/$(PROJECT)-$(VERSION)
 

@@ -310,6 +310,11 @@ public class JedisClusterConnection implements RedisClusterConnection {
 	}
 
 	@Override
+	public RedisJsonCommands jsonCommands() {
+		return null;
+	}
+
+	@Override
 	public RedisScriptingCommands scriptingCommands() {
 		return new JedisClusterScriptingCommands(this);
 	}
