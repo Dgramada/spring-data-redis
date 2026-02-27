@@ -89,6 +89,7 @@ public class ReactiveRedisTemplate<K, V> implements ReactiveRedisOperations<K, V
 	private final ReactiveStreamOperations<K, ?, ?> streamOps;
 	private final ReactiveValueOperations<K, V> valueOps;
 	private final ReactiveZSetOperations<K, V> zsetOps;
+	private final ReactiveJsonOperations<K> jsonOps;
 
 	/**
 	 * Creates new {@link ReactiveRedisTemplate} using given {@link ReactiveRedisConnectionFactory} and
@@ -129,6 +130,7 @@ public class ReactiveRedisTemplate<K, V> implements ReactiveRedisOperations<K, V
 		this.streamOps = opsForStream(serializationContext);
 		this.valueOps = opsForValue(serializationContext);
 		this.zsetOps = opsForZSet(serializationContext);
+		this.jsonOps = opsForJson(serializationContext);
 	}
 
 	/**
@@ -663,6 +665,16 @@ public class ReactiveRedisTemplate<K, V> implements ReactiveRedisOperations<K, V
 	@Override
 	public <K1, V1> ReactiveZSetOperations<K1, V1> opsForZSet(RedisSerializationContext<K1, V1> serializationContext) {
 		return new DefaultReactiveZSetOperations<>(this, serializationContext);
+	}
+
+	@Override
+	public ReactiveJsonOperations<K> opsForJson() {
+		return jsonOps;
+	}
+
+	@Override
+	public ReactiveJsonOperations<K> opsForJson(RedisSerializationContext<K, V> serializationContext) {
+		return new DefaultReactiveJsonOperations<>(this, serializationContext);
 	}
 
 	@Override

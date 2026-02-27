@@ -93,6 +93,7 @@ import org.springframework.util.CollectionUtils;
  * @author Chen Li
  * @author Vedran Pavic
  * @author Chris Bono
+ * @author Yordan Tsintsov
  * @param <K> the Redis key type against which the template works (usually a String)
  * @param <V> the Redis value type against which the template works
  * @see StringRedisTemplate
@@ -126,6 +127,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	private final HashOperations<K, ?, ?> hashOps = new DefaultHashOperations<>(this);
 	private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
 	private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
+	private final JsonOperations<@NonNull K> jsonOps = new DefaultJsonOperations<>(this);
 
 	/**
 	 * Constructs a new {@code RedisTemplate} instance.
@@ -1056,6 +1058,20 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	@Override
 	public ZSetOperations<K, V> opsForZSet() {
 		return zSetOps;
+	}
+
+	@Override
+	@NonNull
+	public JsonOperations<@NonNull K> opsForJson() {
+		return jsonOps;
+	}
+
+	@Override
+	@NonNull
+	@SuppressWarnings("unchecked")
+	public BoundJsonOperations<@NonNull K> boundJsonOps(@NonNull K key) {
+		return boundOperations.createProxy(BoundJsonOperations.class, key, DataType.JSON, this,
+				RedisOperations::opsForJson);
 	}
 
 	@SuppressWarnings("unchecked")

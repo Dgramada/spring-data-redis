@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import io.lettuce.core.json.DefaultJsonParser;
 import io.lettuce.core.json.JsonParser;
 import io.lettuce.core.json.JsonPath;
+import io.lettuce.core.json.JsonValue;
 import io.lettuce.core.json.arguments.JsonMsetArgs;
 import io.lettuce.core.json.arguments.JsonSetArgs;
 import org.jspecify.annotations.NonNull;
@@ -993,6 +994,10 @@ public abstract class LettuceConverters extends Converters {
 		};
 	}
 
+	static JsonValue toJsonValue(String value) {
+		return JSON_PARSER.fromObject(value);
+	}
+
 	static JsonSetArgs toJsonSetArgs(JsonSetOption option) {
 
 		return switch (option) {
@@ -1007,7 +1012,7 @@ public abstract class LettuceConverters extends Converters {
 		return new JsonMsetArgs<>(
 				arg.key(),
 				JsonPath.of(arg.path()),
-				JSON_PARSER.fromObject(arg.value())
+				JSON_PARSER.createJsonValue(arg.value())
 		);
 	}
 

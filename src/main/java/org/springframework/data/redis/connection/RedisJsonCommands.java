@@ -32,6 +32,159 @@ public interface RedisJsonCommands {
 	String ROOT_PATH = "$";
 
 	/**
+	 * Append the JSON values into the array at root path after the last element in it.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param values must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @return a list where each element represents the number of elements added to the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrappend/">Redis Documentation: JSON.ARRAPPEND</a>
+	 * @since 4.3
+	 */
+	default List<@Nullable Long> jsonArrAppend(byte[] key, String... values) {
+
+		Assert.notNull(key, "Key must not be null");
+		Assert.noNullElements(values, "Values must not be null");
+
+		return jsonArrAppend(key, ROOT_PATH, values);
+	}
+
+	/**
+	 * Append the JSON values into the array at path after the last element in it.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param values must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @return a list where each element contains the number of elements added to the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrappend/">Redis Documentation: JSON.ARRAPPEND</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrAppend(byte[] key, String path, String... values);
+
+	/**
+	 * Search for the first occurrence of a JSON value in an array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param value must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @return a list where each element contains the index of the first occurrence of the value in the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrindex/">Redis Documentation: JSON.ARRINDEX</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrIndex(byte[] key, String path, String value);
+
+	/**
+	 * Search for the first occurrence of a JSON value in an array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param value must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @param start index to start searching from.
+	 * @return a list where each element contains the index of the first occurrence of the value in the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrindex/">Redis Documentation: JSON.ARRINDEX</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrIndex(byte[] key, String path, String value, long start);
+
+	/**
+	 * Search for the first occurrence of a JSON value in an array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param value must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @param start index to start searching from.
+	 * @param stop index to stop searching at.
+	 * @return a list where each element contains the index of the first occurrence of the value in the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrindex/">Redis Documentation: JSON.ARRINDEX</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrIndex(byte[] key, String path, String value, long start, long stop);
+
+	/**
+	 * Insert the {@code values} into the array at root path before {@code index}.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param index to insert before.
+	 * @param values must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
+	 * @return a list where each element contains the size of the array after the insertion or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrinsert/">Redis Documentation: JSON.ARRINSERT</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrInsert(byte[] key, String path, int index, String... values);
+
+	/**
+	 * Get the length of the array at root path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return a list where each element contains the length of the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrlen/">Redis Documentation: JSON.ARRLEN</a>
+	 * @since 4.3
+	 */
+	default List<@Nullable Long> jsonArrLen(byte[] key) {
+
+		Assert.notNull(key, "Key must not be null");
+
+		return jsonArrLen(key, ROOT_PATH);
+	}
+
+	/**
+	 * Get the length of the array at the given path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @return a list where each element contains the length of the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrlen/">Redis Documentation: JSON.ARRLEN</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrLen(byte[] key, String path);
+
+	/**
+	 * Pop and return the last value in the array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return a list where each element contains the value at the end of the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrpop/">Redis Documentation: JSON.ARRPOP</a>
+	 * @since 4.3
+	 */
+	List<@Nullable String> jsonArrPop(byte[] key);
+
+	/**
+	 * Pop and return the last value in the array at the specified path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @return a list where each element contains the value at the end of the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrpop/">Redis Documentation: JSON.ARRPOP</a>
+	 * @since 4.3
+	 */
+	List<@Nullable String> jsonArrPop(byte[] key, String path);
+
+	/**
+	 * Pop and return the value at the given index in the array at the given path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param index to pop.
+	 * @return a list where each element contains the value at the given index in the array or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrpop/">Redis Documentation: JSON.ARRPOP</a>
+	 * @since 4.3
+	 */
+	List<@Nullable String> jsonArrPop(byte[] key, String path, int index);
+
+	/**
+	 * Trim the array at the given path to the given range.
+	 *
+	 * @param key must not be {@literal null}.L
+	 * @param path must not be {@literal null}.
+	 * @param start index to start trimming from.
+	 * @param stop index to stop trimming at.
+	 * @return a list where each element contains the length of the array after the trim or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.arrtrim/">Redis Documentation: JSON.ARRTRIM</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonArrTrim(byte[] key, String path, int start, int stop);
+
+	/**
 	 * Clear container values (arrays/objects) and set numeric values to 0 at the given key.
 	 *
 	 * @param key must not be {@literal null}.
@@ -87,11 +240,11 @@ public interface RedisJsonCommands {
 	 * Get the JSON values at the given key.
 	 *
 	 * @param key must not be {@literal null}.
-	 * @return list of JSON values or {@literal null} if path does not exist. Absent field values are represented using {@literal null}.
+	 * @return list where each element is a JSON values or {@literal null} if path does not exist.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.get/">Redis Documentation: JSON.GET</a>
 	 * @since 4.3
 	 */
-	default @Nullable List<@Nullable String> jsonGet(byte[] key) {
+	default List<@Nullable String> jsonGet(byte[] key) {
 
 		Assert.notNull(key, "Key must not be null");
 
@@ -103,33 +256,33 @@ public interface RedisJsonCommands {
 	 *
 	 * @param key must not be {@literal null}.
 	 * @param paths must not be {@literal null}.
-	 * @return list of JSON values or null if path does not exist.
+	 * @return list where each element is a JSON values or {@literal null} if path does not exist.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.get/">Redis Documentation: JSON.GET</a>
 	 * @since 4.3
 	 */
-	@Nullable List<@Nullable String> jsonGet(byte[] key, String... paths);
+	List<@Nullable String> jsonGet(byte[] key, String... paths);
 
 	/**
 	 * Merge the JSON value at the given key and path.
 	 *
 	 * @param key must not be {@literal null}.
 	 * @param path must not be {@literal null}.
-	 * @param value the JSON value to merge.
+	 * @param value must not be {@literal null}. {@literal null} values should be represented as JSON "null" values.
 	 * @return {@literal true} if the key was merged, {@literal false} otherwise.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.merge/">Redis Documentation: JSON.MERGE</a>
 	 * @since 4.3
 	 */
-	Boolean jsonMerge(byte[] key, String path, @Nullable String value);
+	Boolean jsonMerge(byte[] key, String path, String value);
 
 	/**
 	 * Get the JSON values at the given keys.
 	 *
 	 * @param keys must not be {@literal null}.
-	 * @return list of JSON values or {@literal null} if path does not exist. Absent field values are represented using {@literal null}.
+	 * @return list of JSON values or {@literal null} if path does not exist.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.mget/">Redis Documentation: JSON.MGET</a>
 	 * @since 4.3
 	 */
-	default @Nullable List<@Nullable String> jsonMGet(byte[]... keys) {
+	default List<@Nullable String> jsonMGet(byte[]... keys) {
 
 		Assert.notEmpty(keys, "Keys must not be empty");
 		Assert.noNullElements(keys, "Keys must not be null");
@@ -142,32 +295,44 @@ public interface RedisJsonCommands {
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param keys must not be {@literal null}.
-	 * @return list of JSON values or null if path does not exist.
+	 * @return list of JSON values or {@literal null} if path does not exist.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.mget/">Redis Documentation: JSON.MGET</a>
 	 * @since 4.3
 	 */
-	@Nullable List<@Nullable String> jsonMGet(String path, byte[]... keys);
+	List<@Nullable String> jsonMGet(String path, byte[]... keys);
 
 	/**
 	 * Set the JSON values at the given keys and paths.
 	 *
 	 * @param args must not be {@literal null}.
-	 * @return {@literal true} if the keys were set, {@literal false} otherwise. Absent field values are represented using {@literal null}.
+	 * @return {@literal true} if the keys were set, {@literal false} otherwise.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.mset/">Redis Documentation: JSON.MSET</a>
 	 * @since 4.3
 	 */
 	Boolean jsonMSet(List<JsonMSetArg> args);
 
 	/**
+	 * Increment the number value at the given key and path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param number must not be {@literal null}.
+	 * @return a list where each element is the new value or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.numincrby/">Redis Documentation: JSON.NUMINCRBY</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Number> jsonNumIncrBy(byte[] key, String path, Number number);
+
+	/**
 	 * Set the JSON value at the given key.
 	 *
 	 * @param key must not be {@literal null}.
-	 * @param value the JSON value to set.
+	 * @param value must not be {@literal null}.
 	 * @return {@literal true} if the key was set, {@literal false} otherwise.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.set/">Redis Documentation: JSON.SET</a>
 	 * @since 4.3
 	 */
-	default Boolean jsonSet(byte[] key, @Nullable String value) {
+	default Boolean jsonSet(byte[] key, String value) {
 
 		Assert.notNull(key, "Key must not be null");
 
@@ -179,13 +344,79 @@ public interface RedisJsonCommands {
 	 *
 	 * @param key must not be {@literal null}.
 	 * @param path must not be {@literal null}.
-	 * @param value the JSON value to set.
+	 * @param value must not be {@literal null}.
 	 * @param option must not be {@literal null}.
 	 * @return {@literal true} if the key was set, {@literal false} otherwise.
 	 * @see <a href="https://redis.io/docs/latest/commands/json.set/">Redis Documentation: JSON.SET</a>
 	 * @since 4.3
 	 */
-	Boolean jsonSet(byte[] key, String path, @Nullable String value, JsonSetOption option);
+	Boolean jsonSet(byte[] key, String path, String value, JsonSetOption option);
+
+	/**
+	 * Append the string JSON value into the string at root path after the last character.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param value must not be {@literal null}.
+	 * @return a list where each element is the new string length or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.strappend/">Redis Documentation: JSON.STRAPPEND</a>
+	 * @since 4.3
+	 */
+	default List<@Nullable Long> jsonStrAppend(byte[] key, String value) {
+
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(value, "Value must not be null");
+
+		return jsonStrAppend(key, ROOT_PATH, value);
+	}
+
+	/**
+	 * Append the string JSON value into the string at path after the last character.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param value must not be {@literal null}.
+	 * @return a list where each element is the new string length or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.strappend/">Redis Documentation: JSON.STRAPPEND</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonStrAppend(byte[] key, String path, String value);
+
+	/**
+	 * Get the string length at root path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return a list where each element is the string length or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.strlen/">Redis Documentation: JSON.STRLEN</a>
+	 * @since 4.3
+	 */
+	default List<@Nullable Long> jsonStrLen(byte[] key) {
+
+		Assert.notNull(key, "Key must not be null");
+
+		return jsonStrLen(key, ROOT_PATH);
+	}
+
+	/**
+	 * Get the string length at the given path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @return a list where each element is the string length or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.strlen/">Redis Documentation: JSON.STRLEN</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Long> jsonStrLen(byte[] key, String path);
+
+	/**
+	 * Toggle boolean values at the given key and path.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @return a list where each element is the new value or {@literal null} if path does not exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.toggle/">Redis Documentation: JSON.TOGGLE</a>
+	 * @since 4.3
+	 */
+	List<@Nullable Boolean> jsonToggle(byte[] key, String path);
 
 	/**
 	 * {@code JSON.SET} command arguments for {@code NX}, {@code XX}.
@@ -244,14 +475,15 @@ public interface RedisJsonCommands {
 	 * @param value the value to set.
 	 * @since 4.3
 	 */
-	record JsonMSetArg(byte[] key, String path, @Nullable Object value) {
+	record JsonMSetArg(byte[] key, String path, String value) {
 
 		public JsonMSetArg {
 			Assert.notNull(key, "Key must not be null");
 			Assert.notNull(path, "Path must not be null");
+			Assert.notNull(value, "Value must not be null");
 		}
 
-		public JsonMSetArg(byte[] key, @Nullable Object value) {
+		public JsonMSetArg(byte[] key, String value) {
 			this(key, ROOT_PATH, value);
 		}
 

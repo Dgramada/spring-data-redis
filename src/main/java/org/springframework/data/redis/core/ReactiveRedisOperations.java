@@ -55,6 +55,7 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @author Christoph Strobl
  * @author Dahye Anne Lee
+ * @author Yordan Tsintsov
  * @since 2.0
  */
 public interface ReactiveRedisOperations<K, V> {
@@ -643,6 +644,20 @@ public interface ReactiveRedisOperations<K, V> {
 	 * @return zset operations.
 	 */
 	<K, V> ReactiveZSetOperations<K, V> opsForZSet(RedisSerializationContext<K, V> serializationContext);
+
+		/**
+	 * Returns the operations performed on JSON values.
+	 *
+	 * @return JSON operations
+	 */
+	ReactiveJsonOperations<K> opsForJson();
+
+	/**
+	 * Returns the operations performed on JSON values bound to the given key.
+	 *
+	 * @return JSON operations bound to the given key
+	 */
+	ReactiveJsonOperations<K> opsForJson(RedisSerializationContext<K, V> serializationContext);
 
 	/**
 	 * @return the {@link RedisSerializationContext}.

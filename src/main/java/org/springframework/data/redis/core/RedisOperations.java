@@ -59,6 +59,7 @@ import org.springframework.util.Assert;
  * @author Chen Li
  * @author Vedran Pavic
  * @author Marcin Grzejszczak
+ * @author Yordan Tsintsov
  */
 @NullUnmarked
 public interface RedisOperations<K, V> {
@@ -781,6 +782,21 @@ public interface RedisOperations<K, V> {
 	 */
 	@NonNull
 	BoundZSetOperations<K, V> boundZSetOps(@NonNull K key);
+
+	/**
+	 * Returns the operations performed on JSON values.
+	 *
+	 * @return JSON operations
+	 */
+	@NonNull JsonOperations<@NonNull K> opsForJson();
+
+	/**
+	 * Returns the operations performed on JSON values bound to the given key.
+	 *
+	 * @param key Redis key
+	 * @return JSON operations bound to the given key
+	 */
+	@NonNull BoundJsonOperations<@NonNull K> boundJsonOps(@NonNull K key);
 
 	/**
 	 * @return the key {@link RedisSerializer}.
