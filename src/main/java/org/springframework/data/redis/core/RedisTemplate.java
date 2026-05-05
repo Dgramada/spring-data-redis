@@ -56,7 +56,9 @@ import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.data.redis.core.types.RedisClientInfo;
 import org.springframework.data.redis.hash.HashMapper;
 import org.springframework.data.redis.hash.ObjectHashMapper;
+import org.springframework.data.redis.serializer.JacksonRedisJsonMapper;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.RedisJsonMapper;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationUtils;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -114,6 +116,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	@SuppressWarnings("rawtypes") private @Nullable RedisSerializer valueSerializer = null;
 	@SuppressWarnings("rawtypes") private @Nullable RedisSerializer hashKeySerializer = null;
 	@SuppressWarnings("rawtypes") private @Nullable RedisSerializer hashValueSerializer = null;
+	private @Nullable RedisJsonMapper redisJsonMapper = null;
 	private RedisSerializer<String> stringSerializer = RedisSerializer.string();
 
 	private @Nullable ScriptExecutor<K> scriptExecutor;
@@ -129,6 +132,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	private final HashOperations<K, ?, ?> hashOps = new DefaultHashOperations<>(this);
 	private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
 	private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
+	private final JsonOperations<@NonNull K> jsonOps = new DefaultJsonOperations<>(this);
 
 	/**
 	 * Constructs a new {@code RedisTemplate} instance.
@@ -160,6 +164,10 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 			if (hashValueSerializer == null) {
 				hashValueSerializer = defaultSerializer;
 			}
+		}
+
+		if (redisJsonMapper == null && ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader)) {
+			redisJsonMapper = JacksonRedisJsonMapper.createDefault();
 		}
 
 		if (scriptExecutor == null) {
@@ -338,6 +346,24 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	 */
 	public void setHashValueSerializer(RedisSerializer<?> hashValueSerializer) {
 		this.hashValueSerializer = hashValueSerializer;
+	}
+
+	/**
+	 * Returns the redisJsonMapper.
+	 *
+	 * @return Returns the redisJsonMapper
+	 */
+	public @Nullable RedisJsonMapper getRedisJsonMapper() {
+		return redisJsonMapper;
+	}
+
+	/**
+	 * Sets the redisJsonMapper to be used by this template. Defaults to {@link JacksonRedisJsonMapper}.
+	 *
+	 * @param redisJsonMapper The redisJsonMapper to set.
+	 */
+	public void setRedisJsonMapper(@Nullable RedisJsonMapper redisJsonMapper) {
+		this.redisJsonMapper = redisJsonMapper;
 	}
 
 	/**
@@ -1035,6 +1061,17 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	@Override
 	public ClusterOperations<K, V> opsForCluster() {
 		return clusterOps;
+	}
+
+	@Override
+	public JsonOperations<@NonNull K> opsForJson() {
+		return jsonOps;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public BoundJsonOperations<@NonNull K> boundJsonOps(@NonNull K key) {
+		return boundOperations.createProxy(BoundJsonOperations.class, key, DataType.JSON, this, RedisOperations::opsForJson);
 	}
 
 	@Override

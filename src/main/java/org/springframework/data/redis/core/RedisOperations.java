@@ -723,6 +723,24 @@ public interface RedisOperations<K, V> {
 	ClusterOperations<K, V> opsForCluster();
 
 	/**
+	 * Returns the JSON specific operations interface.
+	 *
+	 * @return never {@literal null}.
+	 * @since 4.2
+	 */
+	@NonNull
+	JsonOperations<K> opsForJson();
+
+	/**
+	 * Returns the JSON specific operations interface bound to the given key.
+	 *
+	 * @return never {@literal null}.
+	 * @since 4.2
+	 */
+	@NonNull
+	BoundJsonOperations<@NonNull K> boundJsonOps(@NonNull K key);
+
+	/**
 	 * Returns geospatial specific operations interface.
 	 *
 	 * @return never {@literal null}.

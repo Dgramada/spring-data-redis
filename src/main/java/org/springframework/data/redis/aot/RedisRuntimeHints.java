@@ -133,6 +133,7 @@ public class RedisRuntimeHints implements RuntimeHintsRegistrar {
 						TypeReference.of("org.springframework.data.redis.core.DefaultStreamOperations"),
 						TypeReference.of("org.springframework.data.redis.core.DefaultValueOperations"),
 						TypeReference.of("org.springframework.data.redis.core.DefaultZSetOperations"),
+						TypeReference.of("org.springframework.data.redis.core.DefaultJsonOperations"),
 
 						TypeReference.of(RedisKeyValueAdapter.class), TypeReference.of(RedisKeyValueTemplate.class),
 
@@ -162,6 +163,7 @@ public class RedisRuntimeHints implements RuntimeHintsRegistrar {
 		boundOperationsProxy(BoundStreamOperations.class, classLoader, hints);
 		boundOperationsProxy(BoundValueOperations.class, classLoader, hints);
 		boundOperationsProxy(BoundZSetOperations.class, classLoader, hints);
+		boundOperationsProxy(BoundJsonOperations.class, classLoader, hints);
 
 		// Connection Splitting
 		registerRedisConnectionProxy(TypeReference.of(RedisCommands.class), hints);
