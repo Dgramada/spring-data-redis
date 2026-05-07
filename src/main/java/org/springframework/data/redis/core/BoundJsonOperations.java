@@ -15,10 +15,11 @@
  */
 package org.springframework.data.redis.core;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.List;
 import java.util.function.Function;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 
 import static org.springframework.data.redis.core.JsonOperations.*;
 
@@ -28,38 +29,136 @@ import static org.springframework.data.redis.core.JsonOperations.*;
  * @author Yordan Tsintsov
  * @since 4.2
  */
-public interface BoundJsonOperations<K> extends BoundKeyOperations<K> {
+@NullUnmarked
+public interface BoundJsonOperations<K> extends BoundKeyOperations<@NonNull K> {
 
-	<T> @Nullable T array(Function<JsonOperations.JsonArray, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Execute a JSON array operation against the bound key as described by the given specification.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonArray} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @since 4.2
+	 */
+	<T> T array(@NonNull Function<JsonOperations.JsonArray, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	default @Nullable Long clear() {
+	/**
+	 * Clear container values (arrays/objects) and set numeric values to {@code 0} at the document root of the bound key.
+	 *
+	 * @return the number of values cleared, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.clear/">Redis Documentation: JSON.CLEAR</a>
+	 * @since 4.2
+	 */
+	default Long clear() {
 		return clear(ROOT_PATH);
 	}
 
-	@Nullable Long clear(String path);
+	/**
+	 * Clear container values (arrays/objects) and set numeric values to {@code 0} at the given {@code path} of the bound key.
+	 *
+	 * @param path JSONPath expression; must not be {@literal null}.
+	 * @return the number of values cleared, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.clear/">Redis Documentation: JSON.CLEAR</a>
+	 * @since 4.2
+	 */
+	Long clear(@NonNull String path);
 
-	default @Nullable Long delete() {
+	default Long delete() {
 		return delete(ROOT_PATH);
 	}
 
-	@Nullable Long delete(String path);
+	/**
+	 * Delete the JSON value stored at the bound key (entire document at the root path).
+	 *
+	 * @return the number of paths deleted, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.del/">Redis Documentation: JSON.DEL</a>
+	 * @since 4.2
+	 */
+	Long delete(@NonNull String path);
 
-	<T> @Nullable T get(Function<JsonOperations.JsonGet, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Retrieve the JSON value(s) stored at the bound key as described by the given specification.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonGet} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.get/">Redis Documentation: JSON.GET</a>
+	 * @since 4.2
+	 */
+	<T> T get(@NonNull Function<JsonOperations.JsonGet, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	<T> @Nullable T increment(Function<JsonOperations.JsonIncrement, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Increment the numeric value(s) at a path of the bound key by a given number.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonIncrement} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.numincrby/">Redis Documentation: JSON.NUMINCRBY</a>
+	 * @since 4.2
+	 */
+	<T> T increment(@NonNull Function<JsonOperations.JsonIncrement, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	<T> @Nullable T merge(Function<JsonOperations.JsonMerge, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Merge a given JSON value into the document at the bound key using RFC7396 JSON Merge Patch semantics.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonMerge} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.merge/">Redis Documentation: JSON.MERGE</a>
+	 * @since 4.2
+	 */
+	<T> T merge(@NonNull Function<JsonOperations.JsonMerge, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	<T> @Nullable T set(Function<JsonOperations.JsonSet, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Set a JSON value at a path of the bound key as described by the given specification.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonSet} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.set/">Redis Documentation: JSON.SET</a>
+	 * @since 4.2
+	 */
+	<T> T set(@NonNull Function<JsonOperations.JsonSet, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	<T> @Nullable T string(Function<JsonOperations.JsonString, ? extends JsonOperations.JsonOperation<T>> spec);
+	/**
+	 * Execute a JSON string operation against the bound key as described by the given specification.
+	 *
+	 * @param spec function building the {@link JsonOperations.JsonString} operation; must not be {@literal null}.
+	 * @param <T> the type produced by the resulting {@link JsonOperations.JsonOperation}.
+	 * @return the operation result, or {@literal null} when used in pipeline / transaction.
+	 * @since 4.2
+	 */
+	<T> T string(@NonNull Function<JsonOperations.JsonString, ? extends JsonOperations.JsonOperation<T>> spec);
 
-	@Nullable List<@Nullable Boolean> toggle(String path);
+	/**
+	 * Toggle the boolean value(s) at the given {@code path} of the bound key.
+	 *
+	 * @param path JSONPath expression; must not be {@literal null}.
+	 * @return the new boolean value(s) per matching path, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.toggle/">Redis Documentation: JSON.TOGGLE</a>
+	 * @since 4.2
+	 */
+	List<Boolean> toggle(@NonNull String path);
 
-	@Nullable default List<JsonOperations.@Nullable JsonType> type() {
+	/**
+	 * Report the {@link JsonOperations.JsonType type} of the JSON value at the document root of the bound key.
+	 *
+	 * @return the type(s) found at the path, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.type/">Redis Documentation: JSON.TYPE</a>
+	 * @since 4.2
+	 */
+	default List<JsonOperations.JsonType> type() {
 		return type(ROOT_PATH);
 	}
 
-	@Nullable List<JsonOperations.@Nullable JsonType> type(String path);
+	/**
+	 * Report the {@link JsonOperations.JsonType type} of the JSON value(s) at the given {@code path} of the bound key.
+	 *
+	 * @param path JSONPath expression; must not be {@literal null}.
+	 * @return the type(s) found at the path, or {@literal null} when used in pipeline / transaction.
+	 * @see <a href="https://redis.io/commands/json.type/">Redis Documentation: JSON.TYPE</a>
+	 * @since 4.2
+	 */
+	List<JsonOperations.JsonType> type(@NonNull String path);
 
 }

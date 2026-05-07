@@ -15,12 +15,6 @@
  */
 package org.springframework.data.redis.core;
 
-import org.jspecify.annotations.Nullable;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.redis.connection.RedisJsonCommands;
-import org.springframework.data.redis.serializer.RedisJsonMapper;
-import org.springframework.util.Assert;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
@@ -28,12 +22,21 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.redis.connection.RedisJsonCommands;
+import org.springframework.data.redis.serializer.RedisJsonMapper;
+import org.springframework.util.Assert;
+
 /**
  * Default implementation of {@link JsonOperations}.
  *
  * @author Yordan Tsintsov
  * @since 4.2
  */
+@NullUnmarked
 class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements JsonOperations<K> {
 
 	@SuppressWarnings("unchecked")
@@ -49,7 +52,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T array(K key, Function<JsonArray, ? extends JsonOperation<T>> spec) {
+	public <T> T array(@NonNull K key, @NonNull Function<JsonArray, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonArray();
@@ -58,7 +61,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 		Assert.notNull(builder.op, "Operation must not be null");
 		Assert.notNull(builder.path, "Path must not be null");
 
-		List<@Nullable Long> result = switch (builder.op) {
+		List<Long> result = switch (builder.op) {
 			case APPEND -> execute(c -> c.jsonCommands().jsonArrAppend(rawKey, builder.path, jsonMapper().toJsonArr(builder.values)));
 			case INDEX_OF -> execute(c -> c.jsonCommands().jsonArrIndex(rawKey, builder.path, jsonMapper().toJson(builder.values[0])));
 			case INSERT -> execute(c -> c.jsonCommands().jsonArrInsert(rawKey, builder.path, builder.index, jsonMapper().toJsonArr(builder.values)));
@@ -70,7 +73,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 	}
 
 	@Override
-	public @Nullable Long clear(K key, String path) {
+	public Long clear(@NonNull K key, @NonNull String path) {
 
 		byte[] rawKey = rawKey(key);
 
@@ -78,7 +81,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 	}
 
 	@Override
-	public @Nullable Long delete(K key, String path) {
+	public Long delete(@NonNull K key, @NonNull String path) {
 
 		byte[] rawKey = rawKey(key);
 
@@ -87,7 +90,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T get(K key, Function<JsonGet, ? extends JsonOperation<T>> spec) {
+	public <T> T get(@NonNull K key, @NonNull Function<JsonGet, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonGet();
@@ -106,7 +109,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T increment(K key, Function<JsonIncrement, ? extends JsonOperation<T>> spec) {
+	public <T> T increment(@NonNull K key, @NonNull Function<JsonIncrement, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonIncrement();
@@ -120,7 +123,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T merge(K key, Function<JsonMerge, ? extends JsonOperation<T>> spec) {
+	public <T> T merge(@NonNull K key, @NonNull Function<JsonMerge, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonMerge();
@@ -132,18 +135,18 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 	}
 
 	@Override
-	public @Nullable JsonCollectionResult multiGet(Collection<K> keys, String path) {
+	public JsonCollectionResult multiGet(@NonNull Collection<K> keys, @NonNull String path) {
 
 		byte[][] rawKeys = rawKeys(keys);
 
-		List<@Nullable String> result = execute(c -> c.jsonCommands().jsonMGet(path, rawKeys));
+		List<String> result = execute(c -> c.jsonCommands().jsonMGet(path, rawKeys));
 
 		return result != null ? new DefaultJsonCollectionResult(jsonMapper(), result) : null;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T set(K key, Function<JsonSet, ? extends JsonOperation<T>> spec) {
+	public <T> T set(@NonNull K key, @NonNull Function<JsonSet, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonSet();
@@ -162,7 +165,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> @Nullable T string(K key, Function<JsonString, ? extends JsonOperation<T>> spec) {
+	public <T> T string(@NonNull K key, @NonNull Function<JsonString, ? extends JsonOperation<T>> spec) {
 
 		byte[] rawKey = rawKey(key);
 		var builder = new DefaultJsonString();
@@ -171,7 +174,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 		Assert.notNull(builder.op, "Operation must not be null");
 		Assert.notNull(builder.path, "Path must not be null");
 
-		List<@Nullable Long> result = switch (builder.op) {
+		List<Long> result = switch (builder.op) {
 			case APPEND -> {
 				Assert.notNull(builder.value, "Value must not be null");
 				yield execute(c -> c.jsonCommands().jsonStrAppend(rawKey, builder.path, builder.value));
@@ -183,7 +186,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 	}
 
 	@Override
-	public @Nullable List<@Nullable Boolean> toggle(K key, String path) {
+	public List<Boolean> toggle(@NonNull K key, @NonNull String path) {
 
 		byte[] rawKey = rawKey(key);
 
@@ -191,22 +194,22 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 	}
 
 	@Override
-	public @Nullable List<@Nullable JsonType> type(K key, String path) {
+	public List<JsonType> type(@NonNull K key, @NonNull String path) {
 
 		byte[] rawKey = rawKey(key);
 
-		List<RedisJsonCommands.@Nullable JsonType> result = execute(c -> c.jsonCommands().jsonType(rawKey, path));
+		List<RedisJsonCommands.JsonType> result = execute(c -> c.jsonCommands().jsonType(rawKey, path));
 
 		return result != null ? result.stream().map(type -> type != null ? JsonType.valueOf(type.name()) : null).toList() : null;
 	}
 
 	abstract static class DefaultPathSpec<P extends PathSpec<P>> implements PathSpec<P> {
 
-		@Nullable String path;
+		String path;
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public P at(String jsonPath) {
+		public P at(@NonNull String jsonPath) {
 			this.path = jsonPath;
 			return (P) this;
 		}
@@ -222,26 +225,26 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 			TRIM
 		}
 
-		@Nullable Op op;
+		Op op;
 		int index, start, stop;
-		@Nullable Object[] values = new Object[0];
+		Object[] values = new Object[0];
 
 		@Override
-		public LongListResponse append(@Nullable Object ... values) {
+		public LongListResponse append(Object @NonNull... values) {
 			this.op = Op.APPEND;
 			this.values = values;
 			return this;
 		}
 
 		@Override
-		public LongListResponse indexOf(@Nullable Object value) {
+		public LongListResponse indexOf(Object value) {
 			this.op = Op.INDEX_OF;
-			this.values = new @Nullable Object[]{value};
+			this.values = new Object[]{value};
 			return this;
 		}
 
 		@Override
-		public LongListResponse insert(int index, @Nullable Object ... values) {
+		public LongListResponse insert(int index, Object @NonNull... values) {
 			this.op = Op.INSERT;
 			this.index = index;
 			this.values = values;
@@ -269,18 +272,18 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 		String[] paths = new String[]{};
 
 		@Override
-		public JsonResponse at(String... paths) {
+		public JsonResponse at(@NonNull String @NonNull... paths) {
 			this.paths = paths;
 			return this;
 		}
 	}
 
-	static final class DefaultJsonIncrement extends DefaultPathSpec<JsonIncrement> implements  JsonIncrement, NumericListResponse {
+	static final class DefaultJsonIncrement extends DefaultPathSpec<JsonIncrement> implements JsonIncrement, NumericListResponse {
 
-		@Nullable Number number;
+		Number number;
 
 		@Override
-		public NumericListResponse by(Number number) {
+		public NumericListResponse by(@NonNull Number number) {
 			this.number = number;
 			return this;
 		}
@@ -289,10 +292,10 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	static final class DefaultJsonMerge extends DefaultPathSpec<JsonMerge> implements JsonMerge, BooleanResponse {
 
-		@Nullable Object value;
+		Object value;
 
 		@Override
-		public BooleanResponse with(@Nullable Object value) {
+		public BooleanResponse with(Object value) {
 			this.value = value;
 			return this;
 		}
@@ -308,7 +311,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 		}
 
 		Condition condition = Condition.UPSERT;
-		@Nullable Object value;
+		Object value;
 
 		@Override
 		public JsonSet ifPresent() {
@@ -323,7 +326,7 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 		}
 
 		@Override
-		public BooleanResponse to(@Nullable Object value) {
+		public BooleanResponse to(Object value) {
 			this.value = value;
 			return this;
 		}
@@ -336,11 +339,11 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 			LENGTH
 		}
 
-		@Nullable Op op;
-		@Nullable String value;
+		Op op;
+		String value;
 
 		@Override
-		public LongListResponse append(String value) {
+		public LongListResponse append(@NonNull String value) {
 			this.op = Op.APPEND;
 			this.value = value;
 			return this;
@@ -356,31 +359,31 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	static final class DefaultJsonResult implements JsonResult {
 
-		private final RedisJsonMapper jsonMapper;
-		private final @Nullable String result;
+		private final @NonNull RedisJsonMapper jsonMapper;
+		private final String result;
 
-		DefaultJsonResult(RedisJsonMapper jsonMapper, @Nullable String result) {
+		DefaultJsonResult(@NonNull RedisJsonMapper jsonMapper, String result) {
 			this.jsonMapper = jsonMapper;
 			this.result = result;
 		}
 
 		@Override
-		public @Nullable <V> V as(Class<V> type) {
+		public <V> V as(@NonNull Class<V> type) {
 			return result != null ? jsonMapper.fromJson(result, type) : null;
 		}
 
 		@Override
-		public @Nullable <V> V as(ParameterizedTypeReference<V> typeRef) {
+		public <V> V as(@NonNull ParameterizedTypeReference<V> typeRef) {
 			return result != null ? jsonMapper.fromJson(result, typeRef) : null;
 		}
 
 		@Override
-		public @Nullable String asString() {
+		public String asString() {
 			return result;
 		}
 
 		@Override
-		public byte @Nullable [] asBytes() {
+		public byte[] asBytes() {
 			return result != null ? result.getBytes(StandardCharsets.UTF_8) : null;
 		}
 
@@ -393,31 +396,31 @@ class DefaultJsonOperations<K> extends AbstractOperations<K, Object> implements 
 
 	static final class DefaultJsonCollectionResult implements JsonCollectionResult {
 
-		private final RedisJsonMapper jsonMapper;
-		private final List<@Nullable String> result;
+		private final @NonNull RedisJsonMapper jsonMapper;
+		private final List<String> result;
 
-		DefaultJsonCollectionResult(RedisJsonMapper jsonMapper, List<@Nullable String> result) {
+		DefaultJsonCollectionResult(@NonNull RedisJsonMapper jsonMapper, List<String> result) {
 			this.jsonMapper = jsonMapper;
 			this.result = result;
 		}
 
 		@Override
-		public <V> List<@Nullable V> as(Class<V> type) {
+		public <V> List<V> as(@NonNull Class<V> type) {
 			return result.stream().map(it -> it != null ? jsonMapper.fromJson(it, type) : null).toList();
 		}
 
 		@Override
-		public <V> List<@Nullable V> as(ParameterizedTypeReference<V> typeRef) {
+		public <V> List<V> as(@NonNull ParameterizedTypeReference<V> typeRef) {
 			return result.stream().map(it -> it != null ? jsonMapper.fromJson(it, typeRef) : null).toList();
 		}
 
 		@Override
-		public List<@Nullable String> asString() {
+		public List<String> asString() {
 			return result;
 		}
 
 		@Override
-		public List<byte @Nullable []> asBytes() {
+		public List<byte[]> asBytes() {
 			return result.stream().map(it -> it != null ? it.getBytes(StandardCharsets.UTF_8) : null).toList();
 		}
 
