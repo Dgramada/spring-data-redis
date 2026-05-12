@@ -235,7 +235,7 @@ public interface JsonOperations<K> {
 	 *
 	 * @since 4.2
 	 */
-	interface NumericListResponse extends JsonOperation<Number> {
+	interface NumericListResponse extends JsonOperation<List<Number>> {
 	}
 
 	/**

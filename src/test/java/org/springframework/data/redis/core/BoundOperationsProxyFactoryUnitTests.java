@@ -54,6 +54,7 @@ class BoundOperationsProxyFactoryUnitTests {
 		Stream<Tuple2<Class<?>, Class<?>>> input = Stream.of( //
 				Tuples.of(BoundGeoOperations.class, GeoOperations.class), //
 				Tuples.of(BoundHashOperations.class, HashOperations.class), //
+				Tuples.of(BoundJsonOperations.class, JsonOperations.class), //
 				Tuples.of(BoundListOperations.class, ListOperations.class), //
 				Tuples.of(BoundStreamOperations.class, StreamOperations.class), //
 				Tuples.of(BoundSetOperations.class, SetOperations.class), //
