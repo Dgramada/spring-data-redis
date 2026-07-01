@@ -26,8 +26,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.Person;
 import org.springframework.data.redis.PersonObjectFactory;
 import org.springframework.data.redis.core.DefaultJsonOperations.DefaultJsonResult;
-import org.springframework.data.redis.serializer.JacksonRedisJsonSerializer;
 import org.springframework.data.redis.serializer.RedisJsonSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
  * Unit tests for {@link DefaultJsonResult}.
@@ -37,13 +37,13 @@ import org.springframework.data.redis.serializer.RedisJsonSerializer;
  */
 class DefaultJsonResultUnitTests {
 
-	private final RedisJsonSerializer serializer = JacksonRedisJsonSerializer.createDefault();
+	private final RedisJsonSerializer serializer = (RedisJsonSerializer) RedisSerializer.json();
 
 	@Test
 	void testAsClassDeserializesPojo() {
 
 		Person person = new PersonObjectFactory().instance();
-		DefaultJsonResult result = new DefaultJsonResult(serializer, serializer.serialize(person));
+		DefaultJsonResult result = new DefaultJsonResult(serializer, serializer.serializeAsString(person));
 
 		assertThat(result.as(Person.class)).isEqualTo(person);
 	}

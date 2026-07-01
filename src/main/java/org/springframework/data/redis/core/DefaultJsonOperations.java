@@ -31,7 +31,6 @@ import org.springframework.data.redis.connection.RedisJsonCommands;
 import org.springframework.data.redis.connection.json.JsonPath;
 import org.springframework.data.redis.connection.json.JsonValue;
 import org.springframework.data.redis.serializer.RedisJsonSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.Assert;
 
 /**
@@ -90,7 +89,7 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		JsonPath[] jsonPaths = new JsonPath[paths.length];
 		for (int i = 0; i < paths.length; i++) {
-			jsonPaths[i] = JsonPath.of(paths[i]);
+			jsonPaths[i] = JsonPath.raw(paths[i]);
 		}
 
 		String response = template.execute(c -> c.jsonCommands().jsonGet(rawKey, jsonPaths));
@@ -114,21 +113,6 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 		return serializer;
 	}
 
-	private @Nullable RedisSerializer<K> keySerializer() {
-		return template.getKeySerializer();
-	}
-
-	private RedisSerializer<K> requiredKeySerializer() {
-
-		RedisSerializer<K> serializer = keySerializer();
-
-		if (serializer == null) {
-			throw new IllegalStateException("No key serializer configured");
-		}
-
-		return serializer;
-	}
-
 	@SuppressWarnings("unchecked")
 	private byte[] rawKey(Object key) {
 
@@ -138,7 +122,7 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 			return bytes;
 		}
 
-		return requiredKeySerializer().serialize((K) key);
+		return template.getKeySerializer().serialize((K) key);
 	}
 
 	private byte[][] rawKeys(Collection<K> keys) {
@@ -191,17 +175,17 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable Long clear() {
-			return template.execute(c -> c.jsonCommands().jsonClear(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonClear(key, JsonPath.raw(jsonPath)));
 		}
 
 		@Override
 		public @Nullable Long delete() {
-			return template.execute(c -> c.jsonCommands().jsonDel(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonDel(key, JsonPath.raw(jsonPath)));
 		}
 
 		@Override
 		public JsonResult get() {
-			String result = template.execute(c -> c.jsonCommands().jsonGet(key, JsonPath.of(jsonPath)));
+			String result = template.execute(c -> c.jsonCommands().jsonGet(key, JsonPath.raw(jsonPath)));
 			return new DefaultJsonResult(serializer, result);
 		}
 
@@ -222,8 +206,8 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable Boolean set(T value) {
-			JsonValue jsonValue = JsonValue.raw(serializer.serialize(value));
-			return template.execute(c -> c.jsonCommands().jsonSet(key, JsonPath.of(jsonPath), jsonValue, condition));
+			JsonValue jsonValue = JsonValue.raw(serializer.serializeAsString(value));
+			return template.execute(c -> c.jsonCommands().jsonSet(key, JsonPath.raw(jsonPath), jsonValue, condition));
 		}
 
 	}
@@ -242,24 +226,24 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable List<@Nullable Long> append(Object... values) {
-			JsonValue[] jsonValues = Arrays.stream(values).map(it -> JsonValue.raw(jsonSerializer.serialize(it))).toArray(JsonValue[]::new);
-			return template.execute(c -> c.jsonCommands().jsonArrAppend(key, JsonPath.of(jsonPath), jsonValues));
+			JsonValue[] jsonValues = Arrays.stream(values).map(it -> JsonValue.raw(jsonSerializer.serializeAsString(it))).toArray(JsonValue[]::new);
+			return template.execute(c -> c.jsonCommands().jsonArrAppend(key, JsonPath.raw(jsonPath), jsonValues));
 		}
 
 		@Override
 		public @Nullable List<@Nullable Long> length() {
-			return template.execute(c -> c.jsonCommands().jsonArrLen(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonArrLen(key, JsonPath.raw(jsonPath)));
 		}
 
 		@Override
 		public @Nullable List<@Nullable Long> trim(int start, int end) {
-			return template.execute(c -> c.jsonCommands().jsonArrTrim(key, JsonPath.of(jsonPath), start, end));
+			return template.execute(c -> c.jsonCommands().jsonArrTrim(key, JsonPath.raw(jsonPath), start, end));
 		}
 
 		@Override
 		public @Nullable List<Long> indexOf(Object value) {
-			JsonValue jsonValue = JsonValue.raw(jsonSerializer.serialize(value));
-			return template.execute(c -> c.jsonCommands().jsonArrIndex(key, JsonPath.of(jsonPath), jsonValue));
+			JsonValue jsonValue = JsonValue.raw(jsonSerializer.serializeAsString(value));
+			return template.execute(c -> c.jsonCommands().jsonArrIndex(key, JsonPath.raw(jsonPath), jsonValue));
 		}
 
 		@Override
@@ -287,8 +271,8 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable List<@Nullable Long> insert(Object... values) {
-			JsonValue[] jsonValues = Arrays.stream(values).map(it -> JsonValue.raw(serializer.serialize(it))).toArray(JsonValue[]::new);
-			return template.execute(c -> c.jsonCommands().jsonArrInsert(key, JsonPath.of(jsonPath), index, jsonValues));
+			JsonValue[] jsonValues = Arrays.stream(values).map(it -> JsonValue.raw(serializer.serializeAsString(it))).toArray(JsonValue[]::new);
+			return template.execute(c -> c.jsonCommands().jsonArrInsert(key, JsonPath.raw(jsonPath), index, jsonValues));
 		}
 
 	}
@@ -301,7 +285,7 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable List<@Nullable Boolean> toggle() {
-			return template.execute(c -> c.jsonCommands().jsonToggle(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonToggle(key, JsonPath.raw(jsonPath)));
 		}
 
 	}
@@ -314,12 +298,12 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable List<@Nullable Long> length() {
-			return template.execute(c -> c.jsonCommands().jsonStrLen(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonStrLen(key, JsonPath.raw(jsonPath)));
 		}
 
 		@Override
 		public @Nullable List<@Nullable Long> append(String value) {
-			return template.execute(c -> c.jsonCommands().jsonStrAppend(key, JsonPath.of(jsonPath), value));
+			return template.execute(c -> c.jsonCommands().jsonStrAppend(key, JsonPath.raw(jsonPath), value));
 		}
 
 	}
@@ -332,13 +316,13 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 
 		@Override
 		public @Nullable Boolean mergeWith(Object value) {
-			JsonValue jsonValue = JsonValue.raw(serializer.serialize(value));
-			return template.execute(c -> c.jsonCommands().jsonMerge(key, JsonPath.of(jsonPath), jsonValue));
+			JsonValue jsonValue = JsonValue.raw(serializer.serializeAsString(value));
+			return template.execute(c -> c.jsonCommands().jsonMerge(key, JsonPath.raw(jsonPath), jsonValue));
 		}
 
 		@Override
 		public @Nullable List<RedisJsonCommands.@Nullable JsonType> getType() {
-			return template.execute(c -> c.jsonCommands().jsonType(key, JsonPath.of(jsonPath)));
+			return template.execute(c -> c.jsonCommands().jsonType(key, JsonPath.raw(jsonPath)));
 		}
 
 	}
@@ -358,7 +342,7 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 		@Override
 		public JsonResults get() {
 
-			List<String> response = template.execute(c -> c.jsonCommands().jsonMGet(JsonPath.of(jsonPath), keys));
+			List<String> response = template.execute(c -> c.jsonCommands().jsonMGet(JsonPath.raw(jsonPath), keys));
 			List<JsonResult> result = response == null ? null
 					: response.stream().map(it -> (JsonResult) new DefaultJsonResult(serializer, it)).toList();
 
@@ -409,14 +393,14 @@ class DefaultJsonOperations<K> implements JsonOperations<K> {
 		public <V> V as(Class<V> type) {
 			Assert.notNull(result, "Result must not be null");
 			Assert.notNull(type, "Type must not be null");
-			return serializer.deserialize(result, type);
+			return serializer.deserializeFromString(result, type);
 		}
 
 		@Override
 		public <V> V as(ParameterizedTypeReference<V> type) {
 			Assert.notNull(result, "Result must not be null");
 			Assert.notNull(type, "Type must not be null");
-			return serializer.deserialize(result, type);
+			return serializer.deserializeFromString(result, type);
 		}
 
 		@Override

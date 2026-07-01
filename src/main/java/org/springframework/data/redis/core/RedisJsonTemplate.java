@@ -17,51 +17,65 @@ package org.springframework.data.redis.core;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.JacksonRedisJsonSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisJsonSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that simplifies Redis JSON data access.
  * <p>
  * Keys are serialized with {@link JdkSerializationRedisSerializer} by default, which produces binary (non human-readable)
- * key representations. Configure a key serializer through {@link #setKeySerializer(RedisSerializer)}.
+ * key representations.
  *
  * @author Yordan Tsintsov
  * @since 4.2
  */
-public class RedisJsonTemplate<K> extends RedisAccessor implements BeanClassLoaderAware {
+public class RedisJsonTemplate<K> extends RedisAccessor {
 
-	private boolean enableTransactionSupport = false;
-	private boolean initialized = false;
-	private @Nullable ClassLoader classLoader;
-
-	private @Nullable RedisSerializer<K> keySerializer;
-	private @Nullable RedisJsonSerializer jsonSerializer;
+	private final RedisSerializer<K> keySerializer;
+	private final RedisJsonSerializer jsonSerializer;
+	private final boolean enableTransactionSupport;
 
 	private final JsonOperations<K> jsonOperations = new DefaultJsonOperations<>(this);
 
-	@Override
 	@SuppressWarnings("unchecked")
-	public void afterPropertiesSet() {
+	public RedisJsonTemplate(RedisConnectionFactory connectionFactory) {
+		Assert.notNull(connectionFactory, "ConnectionFactory must not be null!");
+		setConnectionFactory(connectionFactory);
+		this.keySerializer = (RedisSerializer<K>) RedisSerializer.string();
+		this.jsonSerializer = (RedisJsonSerializer) RedisSerializer.json();
+		this.enableTransactionSupport = false;
+	}
 
-		super.afterPropertiesSet();
+	public RedisJsonTemplate(RedisConnectionFactory connectionFactory, RedisSerializer<K> keySerializer, RedisJsonSerializer jsonSerializer, boolean enableTransactionSupport) {
+		Assert.notNull(connectionFactory, "ConnectionFactory must not be null!");
+		Assert.notNull(keySerializer, "KeySerializer must not be null!");
+		Assert.notNull(jsonSerializer, "JsonSerializer must not be null!");
+		setConnectionFactory(connectionFactory);
+		this.keySerializer = keySerializer;
+		this.jsonSerializer = jsonSerializer;
+		this.enableTransactionSupport = enableTransactionSupport;
+	}
 
-		if (keySerializer == null) {
-			keySerializer = (RedisSerializer<K>) new JdkSerializationRedisSerializer(classLoader != null ? classLoader : this.getClass().getClassLoader());
-		}
+	/**
+	 * Returns the key serializer used by this template.
+	 *
+	 * @return the key serializer used by this template.
+	 */
+	public RedisSerializer<K> getKeySerializer() {
+		return keySerializer;
+	}
 
-		if (jsonSerializer == null && ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader)) {
-			jsonSerializer = JacksonRedisJsonSerializer.createDefault();
-		}
-
-		initialized = true;
+	/**
+	 * Returns the JSON serializer used by this template.
+	 *
+	 * @return the JSON serializer used by this template
+	 */
+	public RedisJsonSerializer getJsonSerializer() {
+		return jsonSerializer;
 	}
 
 	/**
@@ -74,56 +88,12 @@ public class RedisJsonTemplate<K> extends RedisAccessor implements BeanClassLoad
 	}
 
 	/**
-	 * Sets whether this template participates in ongoing transactions using {@literal MULTI...EXEC|DISCARD} to keep track
-	 * of operations.
+	 * Returns the operations performed on JSON values.
 	 *
-	 * @param enableTransactionSupport {@literal true} to participate in ongoing transactions; {@literal false} to not
-	 *                                 track transactions.
-	 * @since 4.2
+	 * @return JSON operations
 	 */
-	public void setEnableTransactionSupport(boolean enableTransactionSupport) {
-		this.enableTransactionSupport = enableTransactionSupport;
-	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
-
-	/**
-	 * Returns the key serializer used by this template.
-	 *
-	 * @return the key serializer used by this template.
-	 */
-	public @Nullable RedisSerializer<K> getKeySerializer() {
-		return keySerializer;
-	}
-
-	/**
-	 * Sets the key serializer to be used by this template.
-	 *
-	 * @param keySerializer the key serializer to be used by this template.
-	 */
-	public void setKeySerializer(@Nullable RedisSerializer<K> keySerializer) {
-		this.keySerializer = keySerializer;
-	}
-
-	/**
-	 * Returns the JSON serializer used by this template.
-	 *
-	 * @return the JSON serializer used by this template
-	 */
-	public @Nullable RedisJsonSerializer getJsonSerializer() {
-		return jsonSerializer;
-	}
-
-	/**
-	 * Sets the JSON serializer to be used by this template.
-	 *
-	 * @param jsonSerializer the JSON serializer to be used by this template.
-	 */
-	public void setJsonSerializer(@Nullable RedisJsonSerializer jsonSerializer) {
-		this.jsonSerializer = jsonSerializer;
+	public JsonOperations<K> opsForJson() {
+		return jsonOperations;
 	}
 
 	/**
@@ -137,7 +107,6 @@ public class RedisJsonTemplate<K> extends RedisAccessor implements BeanClassLoad
 	 */
 	<T extends @Nullable Object> T execute(RedisCallback<T> action) {
 
-		Assert.isTrue(initialized, "template not initialized; call afterPropertiesSet() before using it");
 		Assert.notNull(action, "Callback object must not be null");
 
 		RedisConnectionFactory factory = getRequiredConnectionFactory();
@@ -148,15 +117,6 @@ public class RedisJsonTemplate<K> extends RedisAccessor implements BeanClassLoad
 		} finally {
 			RedisConnectionUtils.releaseConnection(connection, factory);
 		}
-	}
-
-	/**
-	 * Returns the operations performed on JSON values.
-	 *
-	 * @return JSON operations
-	 */
-	public JsonOperations<K> opsForJson() {
-		return jsonOperations;
 	}
 
 }

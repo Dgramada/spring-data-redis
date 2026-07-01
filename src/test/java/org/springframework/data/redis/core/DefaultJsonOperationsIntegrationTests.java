@@ -35,7 +35,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisJsonCommands;
 import org.springframework.data.redis.connection.jedis.extension.JedisConnectionFactoryExtension;
 import org.springframework.data.redis.connection.lettuce.extension.LettuceConnectionFactoryExtension;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.test.condition.EnabledOnCommand;
 import org.springframework.data.redis.test.extension.RedisStandalone;
 
@@ -72,10 +71,7 @@ class DefaultJsonOperationsIntegrationTests<K> {
 
 		ObjectFactory<String> stringFactory = new StringObjectFactory();
 
-		RedisJsonTemplate<String> stringTemplate = new RedisJsonTemplate<>();
-		stringTemplate.setKeySerializer(StringRedisSerializer.UTF_8);
-		stringTemplate.setConnectionFactory(connectionFactory);
-		stringTemplate.afterPropertiesSet();
+		RedisJsonTemplate<String> stringTemplate = new RedisJsonTemplate<>(connectionFactory);
 
 		return Arrays.asList(new Object[][] { { stringTemplate, stringFactory } });
 	}

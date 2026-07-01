@@ -38,7 +38,7 @@ public interface JsonPath {
 	 * @param path the JSON path. Must not be {@literal null}.
 	 * @return {@link JsonPath} representing JSON path.
 	 */
-	static JsonPath of(String path) {
+	static JsonPath raw(String path) {
 		return new DefaultJsonPath(path);
 	}
 
