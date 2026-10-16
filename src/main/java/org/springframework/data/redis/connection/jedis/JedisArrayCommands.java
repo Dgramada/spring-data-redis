@@ -15,7 +15,12 @@
  */
 package org.springframework.data.redis.connection.jedis;
 
+import redis.clients.jedis.BuilderFactory;
+import redis.clients.jedis.CommandArguments;
+import redis.clients.jedis.CommandObject;
+import redis.clients.jedis.Protocol;
 import redis.clients.jedis.UnifiedJedis;
+import redis.clients.jedis.args.ArrayBitwise;
 import redis.clients.jedis.args.LongRange;
 import redis.clients.jedis.commands.PipelineBinaryCommands;
 import redis.clients.jedis.util.KeyValue;
@@ -169,8 +174,11 @@ class JedisArrayCommands implements RedisArrayCommands {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(aggregate, "Aggregate must not be null");
 
-		return connection.invoke().just(UnifiedJedis::aropBitwise, PipelineBinaryCommands::aropBitwise, key, start, end,
-				JedisConverters.toArrayBitwise(aggregate));
+		ArrayBitwise bitwise = JedisConverters.toArrayBitwise(aggregate);
+
+		// UnifiedJedis#aropBitwise unboxes the reply and fails on nil for an empty range.
+		return connection.invoke().just(jedis -> jedis.executeCommand(aropBitwise(key, start, end, bitwise)),
+				pipeline -> pipeline.aropBitwise(key, start, end, bitwise));
 	}
 
 	@Override
@@ -227,6 +235,11 @@ class JedisArrayCommands implements RedisArrayCommands {
 		Assert.noNullElements(values, "Values must not contain null values");
 
 		return connection.invoke().just(UnifiedJedis::arset, PipelineBinaryCommands::arset, key, index, values);
+	}
+
+	private static CommandObject<Long> aropBitwise(byte[] key, long start, long end, ArrayBitwise bitwise) {
+		return new CommandObject<>(new CommandArguments(Protocol.Command.AROP).key(key).add(start).add(end).add(bitwise),
+				BuilderFactory.LONG);
 	}
 
 	private Map<Long, byte[]> decodeArScan(List<KeyValue<Long, byte[]>> list) {
