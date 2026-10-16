@@ -38,7 +38,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.connection.CompareCondition;
 import org.springframework.data.redis.connection.DataType;
-import org.springframework.data.redis.connection.convert.Converters;
 import org.springframework.data.redis.connection.ExpirationOptions;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -46,6 +45,7 @@ import org.springframework.data.redis.connection.RedisKeyCommands;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.connection.RedisTxCommands;
 import org.springframework.data.redis.connection.SortParameters;
+import org.springframework.data.redis.connection.convert.Converters;
 import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.data.redis.core.query.QueryUtils;
@@ -120,6 +120,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	private @Nullable ScriptExecutor<K> scriptExecutor;
 
 	private final BoundOperationsProxyFactory boundOperations = new BoundOperationsProxyFactory();
+	private final ArrayOperations<@NonNull K, @NonNull V> arrayOps = new DefaultArrayOperations<>(this);
 	private final ValueOperations<K, V> valueOps = new DefaultValueOperations<>(this);
 	private final ListOperations<K, V> listOps = new DefaultListOperations<>(this);
 	private final SetOperations<K, V> setOps = new DefaultSetOperations<>(this);
@@ -1032,6 +1033,18 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 	// -------------------------------------------------------------------------
 	// Methods to obtain specific operations interface objects.
 	// -------------------------------------------------------------------------
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public BoundArrayOperations<@NonNull K, @NonNull V> boundArrayOps(@NonNull K key) {
+		return boundOperations.createProxy(BoundArrayOperations.class, key, DataType.ARRAY, this,
+				RedisOperations::opsForArray);
+	}
+
+	@Override
+	public @NonNull ArrayOperations<@NonNull K, @NonNull V> opsForArray() {
+		return arrayOps;
+	}
 
 	@Override
 	public ClusterOperations<K, V> opsForCluster() {

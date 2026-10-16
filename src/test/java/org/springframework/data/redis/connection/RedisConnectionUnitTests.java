@@ -108,6 +108,11 @@ class RedisConnectionUnitTests {
 		}
 
 		@Override
+		public RedisArrayCommands arrayCommands() {
+			return null;
+		}
+
+		@Override
 		public RedisGeoCommands geoCommands() {
 			return null;
 		}

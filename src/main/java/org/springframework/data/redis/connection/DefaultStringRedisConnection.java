@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
@@ -33,6 +34,9 @@ import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.RedisSystemException;
+import org.springframework.data.redis.connection.array.ArrayRange;
+import org.springframework.data.redis.connection.array.BitwiseAggregate;
+import org.springframework.data.redis.connection.array.NumericAggregate;
 import org.springframework.data.redis.connection.convert.Converters;
 import org.springframework.data.redis.connection.convert.ListConverter;
 import org.springframework.data.redis.connection.convert.MapConverter;
@@ -104,6 +108,12 @@ public class DefaultStringRedisConnection implements StringRedisConnection, Deco
 	private ListConverter<byte[], String> byteListToStringList = new ListConverter<>(bytesToString);
 	private MapConverter<byte[], String> byteMapToStringMap = new MapConverter<>(bytesToString);
 	private SetConverter<byte[], String> byteSetToStringSet = new SetConverter<>(bytesToString);
+	private Converter<Map<Long, byte[]>, Map<Long, String>> byteIndexMapToStringIndexMap = source -> {
+
+		Map<Long, String> target = new LinkedHashMap<>(source.size());
+		source.forEach((index, value) -> target.put(index, bytesToString.convert(value)));
+		return target;
+	};
 	private Converter<GeoResults<GeoLocation<byte[]>>, GeoResults<GeoLocation<String>>> byteGeoResultsToStringGeoResults;
 	private Converter<ByteRecord, StringRecord> byteMapRecordToStringMapRecordConverter = new Converter<ByteRecord, StringRecord>() {
 
@@ -191,6 +201,11 @@ public class DefaultStringRedisConnection implements StringRedisConnection, Deco
 
 	@Override
 	public RedisCommands commands() {
+		return this;
+	}
+
+	@Override
+	public RedisArrayCommands arrayCommands() {
 		return this;
 	}
 
@@ -2814,6 +2829,202 @@ public class DefaultStringRedisConnection implements StringRedisConnection, Deco
 	@Override
 	public void pfMerge(String destinationKey, String... sourceKeys) {
 		this.pfMerge(serialize(destinationKey), serializeMulti(sourceKeys));
+	}
+
+	@Override
+	public Long arCount(byte @NonNull [] key) {
+		return convertAndReturn(delegate.arCount(key), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arCount(@NonNull String key) {
+		return arCount(serialize(key));
+	}
+
+	@Override
+	public Long arDel(byte @NonNull [] key, long... indices) {
+		return convertAndReturn(delegate.arDel(key, indices), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arDel(@NonNull String key, long... indices) {
+		return arDel(serialize(key), indices);
+	}
+
+	@Override
+	public Long arDelRange(byte @NonNull [] key, long start, long end) {
+		return convertAndReturn(delegate.arDelRange(key, start, end), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arDelRange(@NonNull String key, long start, long end) {
+		return arDelRange(serialize(key), start, end);
+	}
+
+	@Override
+	public Long arDelRange(byte @NonNull [] key, ArrayRange... ranges) {
+		return convertAndReturn(delegate.arDelRange(key, ranges), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arDelRange(@NonNull String key, ArrayRange... ranges) {
+		return arDelRange(serialize(key), ranges);
+	}
+
+	@Override
+	public byte[] arGet(byte @NonNull [] key, long index) {
+		return convertAndReturn(delegate.arGet(key, index), Converters.identityConverter());
+	}
+
+	@Override
+	public String arGet(@NonNull String key, long index) {
+		return convertAndReturn(delegate.arGet(serialize(key), index), bytesToString);
+	}
+
+	@Override
+	public List<byte[]> arGetRange(byte @NonNull [] key, long start, long end) {
+		return convertAndReturn(delegate.arGetRange(key, start, end), Converters.identityConverter());
+	}
+
+	@Override
+	public List<String> arGetRange(@NonNull String key, long start, long end) {
+		return convertAndReturn(delegate.arGetRange(serialize(key), start, end), byteListToStringList);
+	}
+
+	@Override
+	public List<byte[]> arLastItems(byte @NonNull [] key, long count) {
+		return convertAndReturn(delegate.arLastItems(key, count), Converters.identityConverter());
+	}
+
+	@Override
+	public List<String> arLastItems(@NonNull String key, long count) {
+		return convertAndReturn(delegate.arLastItems(serialize(key), count), byteListToStringList);
+	}
+
+	@Override
+	public List<byte[]> arLastItems(byte @NonNull [] key, long count, boolean reverse) {
+		return convertAndReturn(delegate.arLastItems(key, count, reverse), Converters.identityConverter());
+	}
+
+	@Override
+	public List<String> arLastItems(@NonNull String key, long count, boolean reverse) {
+		return convertAndReturn(delegate.arLastItems(serialize(key), count, reverse), byteListToStringList);
+	}
+
+	@Override
+	public Long arLen(byte @NonNull [] key) {
+		return convertAndReturn(delegate.arLen(key), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arLen(@NonNull String key) {
+		return arLen(serialize(key));
+	}
+
+	@Override
+	public List<byte[]> arMGet(byte @NonNull [] key, long... indices) {
+		return convertAndReturn(delegate.arMGet(key, indices), Converters.identityConverter());
+	}
+
+	@Override
+	public List<String> arMGet(@NonNull String key, long... indices) {
+		return convertAndReturn(delegate.arMGet(serialize(key), indices), byteListToStringList);
+	}
+
+	@Override
+	public Long arMSet(byte @NonNull [] key, @NonNull Map<@NonNull Long, byte @NonNull []> pairs) {
+		return convertAndReturn(delegate.arMSet(key, pairs), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arMSet(@NonNull String key, @NonNull Map<Long, String> pairs) {
+
+		Assert.notNull(pairs, "Pairs must not be null");
+
+		Map<Long, byte[]> serialized = new LinkedHashMap<>(pairs.size());
+		pairs.forEach((index, value) -> serialized.put(index, serialize(value)));
+
+		return arMSet(serialize(key), serialized);
+	}
+
+	@Override
+	public byte[] arOp(byte @NonNull [] key, long start, long end, NumericAggregate numericAggregate) {
+		return convertAndReturn(delegate.arOp(key, start, end, numericAggregate), Converters.identityConverter());
+	}
+
+	@Override
+	public String arOp(@NonNull String key, long start, long end, NumericAggregate numericAggregate) {
+		return convertAndReturn(delegate.arOp(serialize(key), start, end, numericAggregate), bytesToString);
+	}
+
+	@Override
+	public Long arOp(byte @NonNull [] key, long start, long end, BitwiseAggregate aggregate) {
+		return convertAndReturn(delegate.arOp(key, start, end, aggregate), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arOp(@NonNull String key, long start, long end, BitwiseAggregate aggregate) {
+		return arOp(serialize(key), start, end, aggregate);
+	}
+
+	@Override
+	public Long arOpMatch(byte @NonNull [] key, long start, long end, byte @NonNull [] value) {
+		return convertAndReturn(delegate.arOpMatch(key, start, end, value), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arOpMatch(@NonNull String key, long start, long end, @NonNull String value) {
+		return arOpMatch(serialize(key), start, end, serialize(value));
+	}
+
+	@Override
+	public Long arOpUsed(byte @NonNull [] key, long start, long end) {
+		return convertAndReturn(delegate.arOpUsed(key, start, end), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arOpUsed(@NonNull String key, long start, long end) {
+		return arOpUsed(serialize(key), start, end);
+	}
+
+	@Override
+	public Long arRing(byte @NonNull [] key, long size, byte[]... values) {
+		return convertAndReturn(delegate.arRing(key, size, values), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arRing(@NonNull String key, long size, String... values) {
+		return arRing(serialize(key), size, serializeMulti(values));
+	}
+
+	@Override
+	public Map<Long, byte[]> arScan(byte @NonNull [] key, long start, long end) {
+		return convertAndReturn(delegate.arScan(key, start, end), Converters.identityConverter());
+	}
+
+	@Override
+	public Map<Long, String> arScan(@NonNull String key, long start, long end) {
+		return convertAndReturn(delegate.arScan(serialize(key), start, end), byteIndexMapToStringIndexMap);
+	}
+
+	@Override
+	public Map<Long, byte[]> arScan(byte @NonNull [] key, long start, long end, long limit) {
+		return convertAndReturn(delegate.arScan(key, start, end, limit), Converters.identityConverter());
+	}
+
+	@Override
+	public Map<Long, String> arScan(@NonNull String key, long start, long end, long limit) {
+		return convertAndReturn(delegate.arScan(serialize(key), start, end, limit), byteIndexMapToStringIndexMap);
+	}
+
+	@Override
+	public Long arSet(byte @NonNull [] key, long index, byte[]... values) {
+		return convertAndReturn(delegate.arSet(key, index, values), Converters.identityConverter());
+	}
+
+	@Override
+	public Long arSet(@NonNull String key, long index, String... values) {
+		return arSet(serialize(key), index, serializeMulti(values));
 	}
 
 	@Override

@@ -80,6 +80,7 @@ public class LettuceClusterConnection extends LettuceConnection
 	private final ClusterCommandExecutor clusterCommandExecutor;
 	private final ClusterTopologyProvider topologyProvider;
 
+	private final LettuceClusterArrayCommands arrayCommands = new LettuceClusterArrayCommands(this);
 	private final LettuceClusterGeoCommands geoCommands = new LettuceClusterGeoCommands(this);
 	private final LettuceClusterHashCommands hashCommands = new LettuceClusterHashCommands(this);
 	private final LettuceClusterHyperLogLogCommands hllCommands = new LettuceClusterHyperLogLogCommands(this);
@@ -223,6 +224,11 @@ public class LettuceClusterConnection extends LettuceConnection
 	@Override
 	public org.springframework.data.redis.connection.RedisClusterCommands clusterCommands() {
 		return this;
+	}
+
+	@Override
+	public RedisArrayCommands arrayCommands() {
+		return arrayCommands;
 	}
 
 	@Override

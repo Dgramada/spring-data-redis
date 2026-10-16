@@ -144,6 +144,7 @@ public class LettuceConnection extends AbstractRedisConnection {
 
 	private volatile @Nullable LettuceSubscription subscription;
 
+	private final LettuceArrayCommands arrayCommands = new LettuceArrayCommands(this);
 	private final LettuceGeoCommands geoCommands = new LettuceGeoCommands(this);
 	private final LettuceHashCommands hashCommands = new LettuceHashCommands(this);
 	private final LettuceHyperLogLogCommands hyperLogLogCommands = new LettuceHyperLogLogCommands(this);
@@ -254,6 +255,11 @@ public class LettuceConnection extends AbstractRedisConnection {
 	@Override
 	public org.springframework.data.redis.connection.RedisCommands commands() {
 		return this;
+	}
+
+	@Override
+	public RedisArrayCommands arrayCommands() {
+		return this.arrayCommands;
 	}
 
 	@Override

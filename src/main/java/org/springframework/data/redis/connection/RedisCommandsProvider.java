@@ -32,6 +32,14 @@ public interface RedisCommandsProvider {
 	RedisCommands commands();
 
 	/**
+	 * Get {@link RedisArrayCommands}.
+	 *
+	 * @return never {@literal null}.
+	 * @since 4.2
+	 */
+	RedisArrayCommands arrayCommands();
+
+	/**
 	 * Get {@link RedisGeoCommands}.
 	 *
 	 * @return never {@literal null}.

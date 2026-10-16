@@ -26,11 +26,15 @@ import java.util.concurrent.TimeUnit;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.array.ArrayRange;
+import org.springframework.data.redis.connection.array.BitwiseAggregate;
+import org.springframework.data.redis.connection.array.NumericAggregate;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.PendingMessage;
 import org.springframework.data.redis.connection.stream.PendingMessages;
@@ -2700,6 +2704,255 @@ public interface StringRedisConnection extends RedisConnection {
 	 * @see RedisHyperLogLogCommands#pfMerge(byte[], byte[]...)
 	 */
 	void pfMerge(@NonNull String destinationKey, @NonNull String @NonNull... sourceKeys);
+
+	// -------------------------------------------------------------------------
+	// Methods dealing with Redis Arrays
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Return the number of non-empty elements.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return the number of non-empty elements in an array.
+	 * @see <a href="https://redis.io/docs/latest/commands/arcount">Redis Documentation: ARCOUNT</a>
+	 * @see RedisArrayCommands#arCount(byte[])
+	 * @since 4.2
+	 */
+	Long arCount(@NonNull String key);
+
+	/**
+	 * Delete the elements at the specified indices.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param indices of the elements to delete.
+	 * @return the number of elements deleted.
+	 * @see <a href="https://redis.io/docs/latest/commands/ardel">Redis Documentation: ARDEL</a>
+	 * @see RedisArrayCommands#arDel(byte[], long...)
+	 * @since 4.2
+	 */
+	Long arDel(@NonNull String key, long... indices);
+
+	/**
+	 * Delete elements in a range.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the range (inclusive).
+	 * @param end index of the range (inclusive).
+	 * @return the number of elements deleted.
+	 * @see <a href="https://redis.io/docs/latest/commands/ardelrange">Redis Documentation: ARDELRANGE</a>
+	 * @see RedisArrayCommands#arDelRange(byte[], long, long)
+	 * @since 4.2
+	 */
+	Long arDelRange(@NonNull String key, long start, long end);
+
+	/**
+	 * Delete elements in one or more ranges.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param ranges to delete.
+	 * @return the number of elements deleted.
+	 * @see <a href="https://redis.io/docs/latest/commands/ardelrange">Redis Documentation: ARDELRANGE</a>
+	 * @see RedisArrayCommands#arDelRange(byte[], ArrayRange...)
+	 * @since 4.2
+	 */
+	Long arDelRange(@NonNull String key, ArrayRange... ranges);
+
+	/**
+	 * Get the value at the index.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param index the index of the element to retrieve.
+	 * @return the value at the given index or {@literal null} if key or index doesn't exist.
+	 * @see <a href="https://redis.io/docs/latest/commands/arget">Redis Documentation: ARGET</a>
+	 * @see RedisArrayCommands#arGet(byte[], long)
+	 * @since 4.2
+	 */
+	String arGet(@NonNull String key, long index);
+
+	/**
+	 * Get values in a range of indices.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the first element to return.
+	 * @param end index of the last element to return (inclusive).
+	 * @return the values in a range of indices.
+	 * @see <a href="https://redis.io/docs/latest/commands/argetrange">Redis Documentation: ARGETRANGE</a>
+	 * @see RedisArrayCommands#arGetRange(byte[], long, long)
+	 * @since 4.2
+	 */
+	List<String> arGetRange(@NonNull String key, long start, long end);
+
+	/**
+	 * Return the most recently inserted elements.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param count the number of most recently inserted elements to return.
+	 * @return the most recently inserted elements.
+	 * @see <a href="https://redis.io/docs/latest/commands/arlastitems">Redis Documentation: ARLASTITEMS</a>
+	 * @see RedisArrayCommands#arLastItems(byte[], long)
+	 * @since 4.2
+	 */
+	List<String> arLastItems(@NonNull String key, long count);
+
+	/**
+	 * Return the most recently inserted elements.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param count the number of most recently inserted elements to return.
+	 * @param reverse {@literal true} to return the elements in reverse chronological order (most recently inserted
+	 *          first); {@literal false} to return them in chronological order (oldest of the returned elements first).
+	 *          Either way, the same {@code count} most recently inserted elements are returned.
+	 * @return the most recently inserted elements.
+	 * @see <a href="https://redis.io/docs/latest/commands/arlastitems">Redis Documentation: ARLASTITEMS</a>
+	 * @see RedisArrayCommands#arLastItems(byte[], long, boolean)
+	 * @since 4.2
+	 */
+	List<String> arLastItems(@NonNull String key, long count, boolean reverse);
+
+	/**
+	 * Returns the length of the array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return the length of the array.
+	 * @see <a href="https://redis.io/docs/latest/commands/arlen">Redis Documentation: ARLEN</a>
+	 * @see RedisArrayCommands#arLen(byte[])
+	 * @since 4.2
+	 */
+	Long arLen(@NonNull String key);
+
+	/**
+	 * Get values at multiple indices.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param indices of the elements to retrieve.
+	 * @return values at multiple indices or {@literal null} for any index that is not set.
+	 * @see <a href="https://redis.io/docs/latest/commands/armget">Redis Documentation: ARMGET</a>
+	 * @see RedisArrayCommands#arMGet(byte[], long...)
+	 * @since 4.2
+	 */
+	List<String> arMGet(@NonNull String key, long... indices);
+
+	/**
+	 * Set multiple index-value pairs in an array.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param pairs index-value pairs to set; must not be {@literal null}.
+	 * @return the number of new slots that were set.
+	 * @see <a href="https://redis.io/docs/latest/commands/armset">Redis Documentation: ARMSET</a>
+	 * @see RedisArrayCommands#arMSet(byte[], Map)
+	 * @since 4.2
+	 */
+	Long arMSet(@NonNull String key, @NonNull Map<Long, String> pairs);
+
+	/**
+	 * Perform a numeric aggregate operation ({@literal SUM}, {@literal MIN} or {@literal MAX}) on the non-empty elements
+	 * in a range.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the range (inclusive).
+	 * @param end index of the range (inclusive).
+	 * @param numericAggregate the numeric aggregate function to apply. Must not be {@literal null}.
+	 * @return the aggregated numeric value or {@literal null} if no numeric elements are present in the range.
+	 * @see <a href="https://redis.io/docs/latest/commands/arop">Redis Documentation: AROP</a>
+	 * @see RedisArrayCommands#arOp(byte[], long, long, NumericAggregate)
+	 * @since 4.2
+	 */
+	String arOp(@NonNull String key, long start, long end, NumericAggregate numericAggregate);
+
+	/**
+	 * Perform a bitwise aggregate operation ({@literal AND}, {@literal OR} or {@literal XOR}) on the non-empty elements
+	 * in a range.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the range (inclusive).
+	 * @param end index of the range (inclusive).
+	 * @param aggregate the bitwise aggregate function to apply. Must not be {@literal null}.
+	 * @return the bitwise result or {@literal null} if the range is empty.
+	 * @see <a href="https://redis.io/docs/latest/commands/arop">Redis Documentation: AROP</a>
+	 * @see RedisArrayCommands#arOp(byte[], long, long, BitwiseAggregate)
+	 * @since 4.2
+	 */
+	Long arOp(@NonNull String key, long start, long end, BitwiseAggregate aggregate);
+
+	/**
+	 * Count the non-empty elements in a range that are equal to the given {@code value}.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the range (inclusive).
+	 * @param end index of the range (inclusive).
+	 * @param value the value to match against. Must not be {@literal null}.
+	 * @return the number of matching elements.
+	 * @see <a href="https://redis.io/docs/latest/commands/arop">Redis Documentation: AROP</a>
+	 * @see RedisArrayCommands#arOpMatch(byte[], long, long, byte[])
+	 * @since 4.2
+	 */
+	Long arOpMatch(@NonNull String key, long start, long end, @NonNull String value);
+
+	/**
+	 * Count the non-empty elements in a range.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the range (inclusive).
+	 * @param end index of the range (inclusive).
+	 * @return the number of non-empty elements.
+	 * @see <a href="https://redis.io/docs/latest/commands/arop">Redis Documentation: AROP</a>
+	 * @see RedisArrayCommands#arOpUsed(byte[], long, long)
+	 * @since 4.2
+	 */
+	Long arOpUsed(@NonNull String key, long start, long end);
+
+	/**
+	 * Insert values into a ring buffer, wrapping and truncating as needed.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param size size of the ring buffer window.
+	 * @param values to insert into the ring buffer.
+	 * @return the last index where a value was inserted.
+	 * @see <a href="https://redis.io/docs/latest/commands/arring">Redis Documentation: ARRING</a>
+	 * @see RedisArrayCommands#arRing(byte[], long, byte[]...)
+	 * @since 4.2
+	 */
+	Long arRing(@NonNull String key, long size, String... values);
+
+	/**
+	 * Iterate the non-empty elements in a range of indices.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the first element to scan.
+	 * @param end index of the last element to scan (inclusive).
+	 * @return the non-empty elements in the range mapped by their index.
+	 * @see <a href="https://redis.io/docs/latest/commands/arscan">Redis Documentation: ARSCAN</a>
+	 * @see RedisArrayCommands#arScan(byte[], long, long)
+	 * @since 4.2
+	 */
+	Map<Long, String> arScan(@NonNull String key, long start, long end);
+
+	/**
+	 * Iterate the non-empty elements in a range of indices returning at most {@code limit} elements.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param start index of the first element to scan.
+	 * @param end index of the last element to scan (inclusive).
+	 * @param limit the maximum number of elements to return.
+	 * @return the non-empty elements in the range mapped by their index.
+	 * @see <a href="https://redis.io/docs/latest/commands/arscan">Redis Documentation: ARSCAN</a>
+	 * @see RedisArrayCommands#arScan(byte[], long, long, long)
+	 * @since 4.2
+	 */
+	Map<Long, String> arScan(@NonNull String key, long start, long end, long limit);
+
+	/**
+	 * Set values in the array starting from a specified index.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param index at which to start writing.
+	 * @param values to store.
+	 * @return the number of new slots that were set.
+	 * @see <a href="https://redis.io/docs/latest/commands/arset">Redis Documentation: ARSET</a>
+	 * @see RedisArrayCommands#arSet(byte[], long, byte[]...)
+	 * @since 4.2
+	 */
+	Long arSet(@NonNull String key, long index, String... values);
 
 	// -------------------------------------------------------------------------
 	// Methods dealing with Redis Geo-Indexes

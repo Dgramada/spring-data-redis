@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -89,7 +90,7 @@ public class RedisRuntimeHints implements RuntimeHintsRegistrar {
 						TypeReference.of(RedisKeyCommands.class), TypeReference.of(RedisStringCommands.class),
 						TypeReference.of(RedisListCommands.class), TypeReference.of(RedisSetCommands.class),
 						TypeReference.of(RedisZSetCommands.class), TypeReference.of(RedisHashCommands.class),
-						TypeReference.of(RedisJsonCommands.class),
+						TypeReference.of(RedisJsonCommands.class), TypeReference.of(RedisArrayCommands.class),
 						TypeReference.of(RedisTxCommands.class), TypeReference.of(RedisPubSubCommands.class),
 						TypeReference.of(RedisConnectionCommands.class), TypeReference.of(RedisServerCommands.class),
 						TypeReference.of(RedisStreamCommands.class), TypeReference.of(RedisScriptingCommands.class),
@@ -155,6 +156,7 @@ public class RedisRuntimeHints implements RuntimeHintsRegistrar {
 				TypeReference.of(DecoratedRedisConnection.class));
 
 		// keys are bound by a proxy
+		boundOperationsProxy(BoundArrayOperations.class, classLoader, hints);
 		boundOperationsProxy(BoundGeoOperations.class, classLoader, hints);
 		boundOperationsProxy(BoundHashOperations.class, classLoader, hints);
 		boundOperationsProxy(BoundKeyOperations.class, classLoader, hints);
@@ -178,6 +180,7 @@ public class RedisRuntimeHints implements RuntimeHintsRegistrar {
 		registerRedisConnectionProxy(TypeReference.of(RedisStringCommands.class), hints);
 		registerRedisConnectionProxy(TypeReference.of(RedisZSetCommands.class), hints);
 		registerRedisConnectionProxy(TypeReference.of(RedisJsonCommands.class), hints);
+		registerRedisConnectionProxy(TypeReference.of(RedisArrayCommands.class), hints);
 	}
 
 	static void boundOperationsProxy(Class<?> type, @Nullable ClassLoader classLoader, RuntimeHints hints) {

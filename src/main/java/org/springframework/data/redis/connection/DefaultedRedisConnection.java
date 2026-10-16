@@ -26,11 +26,15 @@ import java.util.concurrent.TimeUnit;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.array.ArrayRange;
+import org.springframework.data.redis.connection.array.BitwiseAggregate;
+import org.springframework.data.redis.connection.array.NumericAggregate;
 import org.springframework.data.redis.connection.json.JsonPath;
 import org.springframework.data.redis.connection.json.JsonSetCondition;
 import org.springframework.data.redis.connection.json.JsonType;
@@ -2180,6 +2184,179 @@ public interface DefaultedRedisConnection extends RedisCommands, RedisCommandsPr
 	@Deprecated
 	default List<JsonType> jsonType(byte @NonNull [] key, @NonNull JsonPath path) {
 		return jsonCommands().jsonType(key, path);
+	}
+
+	// ARRAY COMMANDS
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arCount(byte @NonNull [] key) {
+		return arrayCommands().arCount(key);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arDel(byte @NonNull [] key, long... indices) {
+		return arrayCommands().arDel(key, indices);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arDelRange(byte @NonNull [] key, long start, long end) {
+		return arrayCommands().arDelRange(key, start, end);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arDelRange(byte @NonNull [] key, ArrayRange... ranges) {
+		return arrayCommands().arDelRange(key, ranges);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default byte[] arGet(byte @NonNull [] key, long index) {
+		return arrayCommands().arGet(key, index);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default List<byte[]> arGetRange(byte @NonNull [] key, long start, long end) {
+		return arrayCommands().arGetRange(key, start, end);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default List<byte[]> arLastItems(byte @NonNull [] key, long count) {
+		return arrayCommands().arLastItems(key, count);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default List<byte[]> arLastItems(byte @NonNull [] key, long count, boolean reverse) {
+		return arrayCommands().arLastItems(key, count, reverse);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arLen(byte @NonNull [] key) {
+		return arrayCommands().arLen(key);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default List<byte[]> arMGet(byte @NonNull [] key, long... indices) {
+		return arrayCommands().arMGet(key, indices);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arMSet(byte @NonNull [] key, @NonNull Map<@NonNull Long, byte @NonNull []> pairs) {
+		return arrayCommands().arMSet(key, pairs);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default byte[] arOp(byte @NonNull [] key, long start, long end, NumericAggregate numericAggregate) {
+		return arrayCommands().arOp(key, start, end, numericAggregate);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arOp(byte @NonNull [] key, long start, long end, BitwiseAggregate aggregate) {
+		return arrayCommands().arOp(key, start, end, aggregate);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arOpMatch(byte @NonNull [] key, long start, long end, byte @NonNull [] value) {
+		return arrayCommands().arOpMatch(key, start, end, value);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arOpUsed(byte @NonNull [] key, long start, long end) {
+		return arrayCommands().arOpUsed(key, start, end);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arRing(byte @NonNull [] key, long size, byte[]... values) {
+		return arrayCommands().arRing(key, size, values);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Map<Long, byte[]> arScan(byte @NonNull [] key, long start, long end) {
+		return arrayCommands().arScan(key, start, end);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Map<Long, byte[]> arScan(byte @NonNull [] key, long start, long end, long limit) {
+		return arrayCommands().arScan(key, start, end, limit);
+	}
+
+	/**
+	 * @deprecated in favor of {@link RedisConnection#arrayCommands()}.
+	 */
+	@Override
+	@Deprecated
+	default Long arSet(byte @NonNull [] key, long index, byte[]... values) {
+		return arrayCommands().arSet(key, index, values);
 	}
 
 }

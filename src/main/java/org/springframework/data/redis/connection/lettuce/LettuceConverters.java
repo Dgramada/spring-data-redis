@@ -20,6 +20,9 @@ import static org.springframework.data.redis.domain.geo.GeoReference.*;
 
 import io.lettuce.core.*;
 import io.lettuce.core.CompareCondition;
+import io.lettuce.core.array.ArAggregateType;
+import io.lettuce.core.array.ArBitwiseType;
+import io.lettuce.core.array.ArrayIndexRange;
 import io.lettuce.core.cluster.models.partitions.Partitions;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode.NodeFlag;
 import io.lettuce.core.json.arguments.JsonSetArgs;
@@ -57,6 +60,9 @@ import org.springframework.data.redis.connection.RedisListCommands.Position;
 import org.springframework.data.redis.connection.RedisNode.NodeType;
 import org.springframework.data.redis.connection.RedisStringCommands.SetOption;
 import org.springframework.data.redis.connection.SortParameters.Order;
+import org.springframework.data.redis.connection.array.ArrayRange;
+import org.springframework.data.redis.connection.array.BitwiseAggregate;
+import org.springframework.data.redis.connection.array.NumericAggregate;
 import org.springframework.data.redis.connection.convert.Converters;
 import org.springframework.data.redis.connection.convert.StringToRedisClientInfoConverter;
 import org.springframework.data.redis.connection.json.JsonSetCondition;
@@ -1087,6 +1093,35 @@ public abstract class LettuceConverters extends Converters {
 			case OBJECT -> JsonType.OBJECT;
 			case ARRAY -> JsonType.ARRAY;
 			case UNKNOWN -> JsonType.NULL;
+		};
+	}
+
+	static ArrayIndexRange toArrayIndexRange(ArrayRange range) {
+
+		Assert.notNull(range, "Range must not be null");
+
+		return ArrayIndexRange.of(range.getStart(), range.getEnd());
+	}
+
+	static ArAggregateType toArrAggregateType(NumericAggregate numericAggregate) {
+
+		Assert.notNull(numericAggregate, "Aggregate must not be null");
+
+		return switch (numericAggregate.getType()) {
+			case SUM -> ArAggregateType.SUM;
+			case MIN -> ArAggregateType.MIN;
+			case MAX -> ArAggregateType.MAX;
+		};
+	}
+
+	static ArBitwiseType toBitwiseAggregateType(BitwiseAggregate aggregate) {
+
+		Assert.notNull(aggregate, "Aggregate must not be null");
+
+		return switch (aggregate.getType()) {
+			case AND -> ArBitwiseType.AND;
+			case OR -> ArBitwiseType.OR;
+			case XOR -> ArBitwiseType.XOR;
 		};
 	}
 

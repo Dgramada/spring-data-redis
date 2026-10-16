@@ -44,6 +44,19 @@ public enum RedisCommand {
 
 	// -- A
 	APPEND("rw", 2, 2), //
+	ARCOUNT("r", 1, 1), //
+	ARDEL("w", 2), //
+	ARDELRANGE("w", 3), //
+	ARGET("r", 2, 2), //
+	ARGETRANGE("r", 3, 3), //
+	ARLASTITEMS("r", 2, 3), //
+	ARLEN("r", 1, 1), //
+	ARMGET("r", 2), //
+	ARMSET("w", 3), //
+	AROP("r", 4, "aropmatch", "aropused"), //
+	ARRING("w", 3), //
+	ARSCAN("r", 3, 5), //
+	ARSET("w", 3), //
 	AUTH("rw", 1, 1), //
 
 	// -- B

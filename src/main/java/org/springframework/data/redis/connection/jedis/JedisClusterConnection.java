@@ -110,6 +110,7 @@ public class JedisClusterConnection extends JedisConnection implements RedisClus
 		}
 	});
 
+	private final JedisClusterArrayCommands arrayCommands = new JedisClusterArrayCommands(this);
 	private final JedisClusterGeoCommands geoCommands = new JedisClusterGeoCommands(this);
 	private final JedisClusterHashCommands hashCommands = new JedisClusterHashCommands(this);
 	private final JedisClusterHyperLogLogCommands hllCommands = new JedisClusterHyperLogLogCommands(this);
@@ -336,6 +337,11 @@ public class JedisClusterConnection extends JedisConnection implements RedisClus
 	@Override
 	public RedisClusterCommands clusterCommands() {
 		return this;
+	}
+
+	@Override
+	public RedisArrayCommands arrayCommands() {
+		return arrayCommands;
 	}
 
 	@Override

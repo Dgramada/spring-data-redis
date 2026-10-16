@@ -18,10 +18,13 @@ package org.springframework.data.redis.connection.jedis;
 import redis.clients.jedis.GeoCoordinate;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.args.ArrayAggregate;
+import redis.clients.jedis.args.ArrayBitwise;
 import redis.clients.jedis.args.BitOP;
 import redis.clients.jedis.args.FlushMode;
 import redis.clients.jedis.args.GeoUnit;
 import redis.clients.jedis.args.ListPosition;
+import redis.clients.jedis.args.LongRange;
 import redis.clients.jedis.json.JsonSetParams;
 import redis.clients.jedis.params.GeoRadiusParam;
 import redis.clients.jedis.params.GeoSearchParam;
@@ -80,6 +83,9 @@ import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.connection.SortParameters.Order;
 import org.springframework.data.redis.connection.SortParameters.Range;
 import org.springframework.data.redis.connection.ValueEncoding;
+import org.springframework.data.redis.connection.array.ArrayRange;
+import org.springframework.data.redis.connection.array.BitwiseAggregate;
+import org.springframework.data.redis.connection.array.NumericAggregate;
 import org.springframework.data.redis.connection.convert.Converters;
 import org.springframework.data.redis.connection.convert.ListConverter;
 import org.springframework.data.redis.connection.convert.StringToRedisClientInfoConverter;
@@ -933,6 +939,35 @@ abstract class JedisConverters extends Converters {
 			return JsonType.ARRAY;
 		}
 		return JsonType.OBJECT;
+	}
+
+	static LongRange toArrayIndexRange(ArrayRange range) {
+
+		Assert.notNull(range, "Range must not be null");
+
+		return LongRange.of(range.getStart(), range.getEnd());
+	}
+
+	static ArrayAggregate toArrayAggregate(NumericAggregate numericAggregate) {
+
+		Assert.notNull(numericAggregate, "Aggregate must not be null");
+
+		return switch (numericAggregate.getType()) {
+			case SUM -> ArrayAggregate.SUM;
+			case MIN -> ArrayAggregate.MIN;
+			case MAX -> ArrayAggregate.MAX;
+		};
+	}
+
+	static ArrayBitwise toArrayBitwise(BitwiseAggregate aggregate) {
+
+		Assert.notNull(aggregate, "Aggregate must not be null");
+
+		return switch (aggregate.getType()) {
+			case AND -> ArrayBitwise.AND;
+			case OR -> ArrayBitwise.OR;
+			case XOR -> ArrayBitwise.XOR;
+		};
 	}
 
 	/**

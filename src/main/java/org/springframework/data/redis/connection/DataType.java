@@ -38,7 +38,12 @@ public enum DataType {
 	/**
 	 * @since 4.2
 	 */
-	JSON("ReJSON-RL");
+	JSON("ReJSON-RL"),
+
+	/**
+	 * @since 4.2
+	 */
+	ARRAY("array");
 
 	private static final Map<String, DataType> codeLookup = new ConcurrentHashMap<>(7);
 

@@ -714,6 +714,25 @@ public interface RedisOperations<K, V> {
 	// operation types
 
 	/**
+	 * Returns array specific operations interface.
+	 *
+	 * @return never {@literal null}.
+	 * @since 4.2
+	 */
+	@NonNull
+	ArrayOperations<@NonNull K, @NonNull V> opsForArray();
+
+	/**
+	 * Returns array specific operations interface bound to the given key.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @return never {@literal null}.
+	 * @since 4.2
+	 */
+	@NonNull
+	BoundArrayOperations<@NonNull K, @NonNull V> boundArrayOps(@NonNull K key);
+
+	/**
 	 * Returns the cluster specific operations interface.
 	 *
 	 * @return never {@literal null}.

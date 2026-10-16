@@ -92,6 +92,7 @@ public class JedisConnection extends AbstractRedisConnection {
 
 	private volatile @Nullable JedisSubscription subscription;
 
+	private final JedisArrayCommands arrayCommands = new JedisArrayCommands(this);
 	private final JedisGeoCommands geoCommands = new JedisGeoCommands(this);
 	private final JedisHashCommands hashCommands = new JedisHashCommands(this);
 	private final JedisHyperLogLogCommands hllCommands = new JedisHyperLogLogCommands(this);
@@ -254,6 +255,11 @@ public class JedisConnection extends AbstractRedisConnection {
 	@Override
 	public RedisCommands commands() {
 		return this;
+	}
+
+	@Override
+	public RedisArrayCommands arrayCommands() {
+		return arrayCommands;
 	}
 
 	@Override
