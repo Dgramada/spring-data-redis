@@ -5380,6 +5380,27 @@ public abstract class AbstractConnectionIntegrationTests {
 		assertThat(toStrings((List<byte[]>) result.get(3))).containsSequence("[1]", "[1]");
 	}
 
+	@Test // GH-
+	@EnabledOnCommand("JSON.NUMINCRBY")
+	void jsonNumIncrBy() {
+
+		byte[] jsonKey1 = KEY_1.getBytes();
+		byte[] jsonKey2 = KEY_2.getBytes();
+		JsonValue json1 = JsonValue.of(5L);
+		JsonValue json2 = JsonValue.of(1.0);
+
+		actual.add(connection.jsonCommands().jsonSet(jsonKey1, json1));
+		actual.add(connection.jsonCommands().jsonSet(jsonKey2, json2));
+		actual.add(connection.jsonCommands().jsonNumIncrBy(jsonKey1, JsonPath.root(), 1L));
+		actual.add(connection.jsonCommands().jsonNumIncrBy(jsonKey2, JsonPath.root(), 1.5));
+
+		List<Object> result = getResults();
+		assertThat(result.get(0)).isEqualTo(true);
+		assertThat(result.get(1)).isEqualTo(true);
+		assertThat((List<Number>) result.get(2)).containsExactly(6L);
+		assertThat((List<Number>) result.get(3)).containsExactly(2.5);
+	}
+
 	@Test // GH-3390
 	@EnabledOnCommand("JSON.SET")
 	void jsonSet() {

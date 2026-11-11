@@ -169,6 +169,11 @@ public class RedisJsonTemplate<K> implements RedisJsonOperations<K> {
 	}
 
 	@Override
+	public JsonNumberSpec num(K key) {
+		return new DefaultJsonNumberSpec(rawKey(key), JsonPath.root(), JsonSetCondition.upsert());
+	}
+
+	@Override
 	public JsonStringSpec string(K key) {
 		return new DefaultJsonStringSpec(rawKey(key), JsonPath.root(), JsonSetCondition.upsert());
 	}
@@ -445,6 +450,29 @@ public class RedisJsonTemplate<K> implements RedisJsonOperations<K> {
 		@Override
 		public List<@Nullable Boolean> toggle() {
 			return execute(c -> c.jsonToggle(key, jsonPath));
+		}
+
+	}
+
+	class DefaultJsonNumberSpec extends DefaultJsonSpec<Number, JsonNumberSpec> implements JsonNumberSpec {
+
+		DefaultJsonNumberSpec(byte[] key, JsonPath jsonPath, JsonSetCondition condition) {
+			super(key, jsonPath, condition);
+		}
+
+		@Override
+		JsonNumberSpec create(JsonPath jsonPath) {
+			return new DefaultJsonNumberSpec(key, jsonPath, condition);
+		}
+
+		@Override
+		DefaultJsonSpec<Number, JsonNumberSpec> create(byte[] key, JsonPath jsonPath, JsonSetCondition condition) {
+			return new DefaultJsonNumberSpec(key, jsonPath, condition);
+		}
+
+		@Override
+		public List<@Nullable Number> increment(Number value) {
+			return execute(c -> c.jsonNumIncrBy(key, jsonPath, value));
 		}
 
 	}

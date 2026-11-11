@@ -260,6 +260,18 @@ public interface RedisJsonCommands {
 	List<byte[]> jsonMGet(@NonNull JsonPath path, byte @NonNull [] @NonNull... keys);
 
 	/**
+	 * Increment the numeric values at the given key and path by {@code value}.
+	 *
+	 * @param key must not be {@literal null}.
+	 * @param path must not be {@literal null}.
+	 * @param value must not be {@literal null}.
+	 * @return a list where each element contains the new value, or {@literal null} if the matched value is not a
+	 *         number. Returns an empty list if the path does not match any value.
+	 * @see <a href="https://redis.io/docs/latest/commands/json.numincrby/">Redis Documentation: JSON.NUMINCRBY</a>
+	 */
+	List<Number> jsonNumIncrBy(byte @NonNull [] key, @NonNull JsonPath path, @NonNull Number value);
+
+	/**
 	 * Set the {@link JsonValue JSON value} at the root path of the given key.
 	 *
 	 * @param key must not be {@literal null}.

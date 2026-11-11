@@ -190,6 +190,17 @@ class LettuceJsonCommands implements RedisJsonCommands {
 	}
 
 	@Override
+	public List<Number> jsonNumIncrBy(byte @NonNull [] key,
+			org.springframework.data.redis.connection.json.@NonNull JsonPath path, @NonNull Number value) {
+
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(path, "Path must not be null");
+		Assert.notNull(value, "Value must not be null");
+
+		return connection.invoke().just(RedisJsonAsyncCommands::jsonNumincrby, key, toPath(path), value);
+	}
+
+	@Override
 	public Boolean jsonSet(byte @NonNull [] key, org.springframework.data.redis.connection.json.@NonNull JsonPath path, @NonNull JsonValue value, @NonNull JsonSetCondition condition) {
 
 		Assert.notNull(key, "Key must not be null");

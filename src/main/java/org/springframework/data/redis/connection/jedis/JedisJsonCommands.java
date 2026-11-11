@@ -181,6 +181,17 @@ class JedisJsonCommands implements RedisJsonCommands {
 	}
 
 	@Override
+	public List<Number> jsonNumIncrBy(byte @NonNull [] key, @NonNull JsonPath path, @NonNull Number value) {
+
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(path, "Path must not be null");
+		Assert.notNull(value, "Value must not be null");
+
+		return connection.invoke().just(UnifiedJedis::jsonNumIncrByAsNumbers,
+				RedisJsonPipelineCommands::jsonNumIncrByAsNumbers, JedisConverters.toString(key), getPath(path), value);
+	}
+
+	@Override
 	public Boolean jsonSet(byte @NonNull [] key, @NonNull JsonPath path, @NonNull JsonValue value, @NonNull JsonSetCondition condition) {
 
 		Assert.notNull(key, "Key must not be null");

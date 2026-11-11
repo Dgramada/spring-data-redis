@@ -2157,6 +2157,13 @@ public interface DefaultedRedisConnection extends RedisCommands, RedisCommandsPr
 	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
 	@Override
 	@Deprecated
+	default List<Number> jsonNumIncrBy(byte @NonNull [] key, @NonNull JsonPath path, @NonNull Number value) {
+		return jsonCommands().jsonNumIncrBy(key, path, value);
+	}
+
+	/** @deprecated in favor of {@link RedisConnection#jsonCommands()}. */
+	@Override
+	@Deprecated
 	default Boolean jsonSet(byte @NonNull [] key, @NonNull JsonPath path, @NonNull JsonValue value, @NonNull JsonSetCondition condition) {
 		return jsonCommands().jsonSet(key, path, value, condition);
 	}

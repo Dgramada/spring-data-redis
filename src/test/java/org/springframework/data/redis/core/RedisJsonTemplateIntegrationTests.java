@@ -488,6 +488,18 @@ class RedisJsonTemplateIntegrationTests<K> {
 				DRAGON_REBORN);
 	}
 
+	@Test // GH-
+	@EnabledOnCommand("JSON.NUMINCRBY")
+	void numberIncrement() {
+
+		K key1 = keyFactory.instance();
+
+		template.set(key1, DRAGON_REBORN);
+
+		assertThat(template.num(key1).path("$.age").increment(2L)).containsExactly(36L);
+		assertThat(template.num(key1).path("$.callandor.width").increment(0.5)).containsExactly(1.5);
+	}
+
 	@Test // GH-3390
 	@EnabledOnCommand("JSON.SET")
 	void testSet() {
@@ -682,7 +694,7 @@ class RedisJsonTemplateIntegrationTests<K> {
 		assertThat(template.get(key2).exists()).isFalse();
 	}
 
-	record Callandor(String name, double length, double widt) {
+	record Callandor(String name, double length, double width) {
 	}
 
 	record DragonReborn(String name, long age, boolean madness, List<String> titles, List<Long> forsakenDefeated,

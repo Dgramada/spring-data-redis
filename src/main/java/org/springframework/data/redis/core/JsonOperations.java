@@ -36,9 +36,9 @@ import org.springframework.util.Assert;
 /**
  * Fluent operations for storing JSON documents in Redis and accessing their values.
  * <p>
- * Use the {@link #value(Object)}, {@link #array(Object)}, {@link #string(Object)}, and {@link #bool(Object)} entry
- * points to select a key and configure an operation. Commands operate on the document root unless a JSON path is
- * selected. The following example stores a document and reads one of its properties:
+ * Use the {@link #value(Object)}, {@link #array(Object)}, {@link #string(Object)}, {@link #bool(Object)}, and
+ * {@link #num(Object)} entry points to select a key and configure an operation. Commands operate on the document root
+ * unless a JSON path is selected. The following example stores a document and reads one of its properties:
  *
  * <pre class="code">
  * operations.value("user").set(new Person("John", "Doe"));
@@ -77,6 +77,14 @@ public interface JsonOperations<K> {
 	 * @return a spec for specifying the boolean operation.
 	 */
 	JsonBooleanSpec bool(K key);
+
+	/**
+	 * Start building a JSON number operation for the given {@code key}.
+	 *
+	 * @param key the Redis key.
+	 * @return a spec for specifying the number operation.
+	 */
+	JsonNumberSpec num(K key);
 
 	/**
 	 * Start building a JSON string operation for the given {@code key}.
@@ -317,6 +325,24 @@ public interface JsonOperations<K> {
 		 * @see <a href="https://redis.io/commands/json.toggle">Redis Documentation: JSON.TOGGLE</a>
 		 */
 		List<@Nullable Boolean> toggle();
+
+	}
+
+	/**
+	 * Specification for JSON number operations bound to a particular {@code key}.
+	 *
+	 * @see <a href="https://redis.io/commands/json.numincrby">Redis Documentation: JSON.NUMINCRBY</a>
+	 */
+	interface JsonNumberSpec extends JsonKeySupport<JsonNumberSpec>, JsonSet<Number, JsonNumberSpec> {
+
+		/**
+		 * Increment the numeric values at the configured path by {@code value}.
+		 *
+		 * @param value the value to increment by.
+		 * @return the updated value for each matching path, with a {@literal null} element for each non-numeric value.
+		 * @see <a href="https://redis.io/commands/json.numincrby">Redis Documentation: JSON.NUMINCRBY</a>
+		 */
+		List<@Nullable Number> increment(Number value);
 
 	}
 

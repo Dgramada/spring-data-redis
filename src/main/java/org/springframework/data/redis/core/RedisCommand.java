@@ -178,6 +178,7 @@ public enum RedisCommand {
 	JSON_GET("r", 1, "json.get", "jsonget"), //
 	JSON_MERGE("w", 3, 3, "json.merge", "jsonmerge"), //
 	JSON_MGET("r", 2, "json.mget", "jsonmget"), //
+	JSON_NUMINCRBY("w", 3, 3, "json.numincrby", "jsonnumincrby"), //
 	JSON_SET("w", 3, 4, "json.set", "jsonset"), //
 	JSON_STRAPPEND("w", 2, 3, "json.strappend", "jsonstrappend"), //
 	JSON_STRLEN("r", 1, 2, "json.strlen", "jsonstrlen"), //
